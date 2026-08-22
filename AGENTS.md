@@ -357,7 +357,7 @@ Run from the repo root unless noted.
 | `pnpm typecheck` | `tsc --noEmit` across the workspace |
 | `pnpm test` | Full test suite |
 | `pnpm db:up` / `db:down` / `db:reset` | Postgres + pgvector via docker-compose |
-| `pnpm db:migrate` / `db:migrate:dev` / `db:studio` | Prisma migrations and studio |
+| `pnpm db:migrate` / `db:migrate:dev` / `db:studio` / `db:generate` | Prisma migrations, studio, client generation |
 | `pnpm generate:cvs -- --size 30 --seed 42` | Run the CV generation pipeline from the terminal (the UI button does the same thing) |
 | `pnpm ingest:cvs` | Re-extract, chunk, embed, and index the existing PDFs |
 | `pnpm eval` | Run the offline evaluation harness |

@@ -1,0 +1,118 @@
+// Vector search lives in Postgres via pgvector rather than a separate vector
+// database: chunks and their embeddings then commit in one transaction, so a
+// failed embedding batch can never leave a candidate half-indexed.
+//
+// Two things are not expressible here and are hand-written into the migration
+// SQL, which is where this schema stops being the whole truth:
+//   * the HNSW index on CvChunk.embedding — Prisma's index types are
+//     Gin/Gist/Brin/Hash only, so `migrate dev` will want to DROP it on the next
+//     schema change. Re-add it by hand, and keep the CREATE INDEX line from the
+//     init migration as the reference copy.
+//   * the GENERATED ALWAYS expression behind CvChunk.contentSearch. Prisma can
+//     declare the column and its GIN index but not the expression that fills it.
+// Everything else — both extensions, the trigram index on fullName, the GIN
+// index on the tsvector — is declared below so Prisma generates it and never
+// reports it as drift.
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+// The extensions are declared rather than hand-written into the migration, so
+// Prisma creates them itself and stops reporting them as drift.
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [vector, pg_trgm]
+}
+
+enum CvSection {
+  SUMMARY
+  EXPERIENCE
+  EDUCATION
+  SKILLS
+  LANGUAGES
+  CONTACT
+  OTHER
+}
+
+enum Seniority {
+  JUNIOR
+  MID
+  SENIOR
+}
+
+model Candidate {
+  id       String @id @default(uuid()) @db.Uuid
+  slug     String @unique
+  fullName String
+
+  headline String
+  email    String
+  phone    String
+  location String
+  country  String
+
+  yearsExperience Int
+  seniority       Seniority
+  roleFamily      String
+  languages       String[]
+  skills          String[]
+
+  /// The validated CandidateProfile the LLM produced. Kept verbatim because it
+  /// is the ground truth the evaluation harness derives its golden cases from.
+  profileJson Json
+
+  pdfPath      String
+  portraitPath String
+  templateId   String
+
+  /// Deterministic hash of the persona that produced this candidate. Makes
+  /// generation idempotent: a re-run skips anything already present, which is
+  /// what lets a failed batch resume by simply generating again.
+  sourceChecksum String @unique
+
+  createdAt  DateTime  @default(now())
+  ingestedAt DateTime?
+
+  chunks CvChunk[]
+
+  @@index([roleFamily])
+  @@index([seniority])
+  /// Trigram index for the name-match retrieval arm: "Summarize the profile of
+  /// Ana Ruiz" has to find Ana whatever the embedding distance says, and has to
+  /// tolerate a misspelling.
+  @@index([fullName(ops: raw("gin_trgm_ops"))], type: Gin)
+}
+
+model CvChunk {
+  id          String    @id @default(uuid()) @db.Uuid
+  candidateId String    @db.Uuid
+  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  section    CvSection
+  ordinal    Int
+  content    String    @db.Text
+  tokenCount Int
+
+  /// Width is fixed by migration, not configuration. Changing
+  /// EMBEDDING_DIMENSIONS requires a new migration; ingestion asserts the
+  /// embedder's width matches this column at startup.
+  embedding Unsupported("vector(384)")
+
+  /// Database-generated from `content` (english config) — see the migration.
+  /// Declared as Unsupported so Prisma knows the column exists and leaves it
+  /// out of the generated client: writing to it is an error, not an option.
+  /// The empty `dbgenerated()` says "Postgres fills this"; without it every
+  /// `migrate dev` would emit an ALTER stripping the generation expression.
+  contentSearch Unsupported("tsvector")? @default(dbgenerated())
+
+  createdAt DateTime @default(now())
+
+  @@unique([candidateId, ordinal])
+  @@index([candidateId])
+  /// The lexical half of hybrid retrieval. Embeddings alone miss exact tokens
+  /// like "UPC", which is exactly what the demo questions ask about.
+  @@index([contentSearch(ops: raw("tsvector_ops"))], type: Gin)
+}
