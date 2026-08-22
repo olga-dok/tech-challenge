@@ -1,5 +1,5 @@
-import type { RoleFamily, Seniority } from '@repo/contracts';
-import type { CvLanguage } from './Persona';
+import type { CvLanguage, RoleFamily, Seniority } from '@repo/contracts';
+import type { PersonaGender } from './Persona';
 
 /**
  * The raw material the planner deals from. Pure data, deliberately hand-written
@@ -219,17 +219,33 @@ export const CV_LANGUAGE_RING: readonly CvLanguage[] = [
   'es',
 ];
 
-/** 'Ana' is absent on purpose: the planted namesake pair owns that name. */
-export const SPANISH_GIVEN_NAMES: readonly string[] = [
-  'Lucía',
-  'Mateo',
-  'Javier',
-  'Carmen',
-  'Diego',
-  'Elena',
-  'Pablo',
-  'Rocío',
-  'Álvaro',
+export interface GivenName {
+  readonly name: string;
+  readonly gender: PersonaGender;
+}
+
+/**
+ * Names carry the gender they were chosen with, rather than anything downstream
+ * guessing it.
+ *
+ * A guess is both unreliable — plenty of names are used for anyone — and
+ * consequential here: the portrait painter needs it to produce a photo that
+ * matches the CV, and Spanish job titles are gendered, so "Ingeniera" or
+ * "Ingeniero" depends on it. Deciding it in the plan makes it a fact about an
+ * invented person instead of an inference about a real one.
+ *
+ * 'Ana' is absent on purpose: the planted namesake pair owns that name.
+ */
+export const SPANISH_GIVEN_NAMES: readonly GivenName[] = [
+  { name: 'Lucía', gender: 'female' },
+  { name: 'Mateo', gender: 'male' },
+  { name: 'Javier', gender: 'male' },
+  { name: 'Carmen', gender: 'female' },
+  { name: 'Diego', gender: 'male' },
+  { name: 'Elena', gender: 'female' },
+  { name: 'Pablo', gender: 'male' },
+  { name: 'Rocío', gender: 'female' },
+  { name: 'Álvaro', gender: 'male' },
 ];
 
 export const SPANISH_FAMILY_NAMES: readonly string[] = [
@@ -245,18 +261,18 @@ export const SPANISH_FAMILY_NAMES: readonly string[] = [
   'Fuentes',
 ];
 
-export const INTERNATIONAL_GIVEN_NAMES: readonly string[] = [
-  'Noor',
-  'Ingrid',
-  'Tomasz',
-  'Kwame',
-  'Marta',
-  'Sanne',
-  'Aoife',
-  'Luca',
-  'Nadia',
-  'Hugo',
-  'Emeka',
+export const INTERNATIONAL_GIVEN_NAMES: readonly GivenName[] = [
+  { name: 'Noor', gender: 'female' },
+  { name: 'Ingrid', gender: 'female' },
+  { name: 'Tomasz', gender: 'male' },
+  { name: 'Kwame', gender: 'male' },
+  { name: 'Marta', gender: 'female' },
+  { name: 'Sanne', gender: 'female' },
+  { name: 'Aoife', gender: 'female' },
+  { name: 'Luca', gender: 'male' },
+  { name: 'Nadia', gender: 'female' },
+  { name: 'Hugo', gender: 'male' },
+  { name: 'Emeka', gender: 'male' },
 ];
 
 export const INTERNATIONAL_FAMILY_NAMES: readonly string[] = [

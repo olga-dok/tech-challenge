@@ -53,7 +53,7 @@ describe('loadAppConfig', () => {
         batchDelayMs: 1_500,
         batchBackoffFactor: 2,
         maxBatchDelayMs: 60_000,
-        defaultCorpusSize: 30,
+        defaultCorpusSize: 25,
         seed: 42,
       });
       expect(config.observability.enabled).toBe(false);

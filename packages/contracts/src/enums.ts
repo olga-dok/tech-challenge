@@ -48,3 +48,25 @@ export const LanguageLevelSchema = z.enum([
 ]);
 export type LanguageLevel = z.infer<typeof LanguageLevelSchema>;
 export const LANGUAGE_LEVELS = LanguageLevelSchema.options;
+
+/**
+ * Which layout a CV was rendered with. Lives here because it crosses the
+ * boundary three ways: the api stores it on the candidate row, the renderer
+ * picks a template by it, and the web app renders the same templates in the
+ * browser.
+ */
+export const CvTemplateIdSchema = z.enum(['classic', 'sidebar', 'header-band']);
+export type CvTemplateId = z.infer<typeof CvTemplateIdSchema>;
+export const CV_TEMPLATE_IDS = CvTemplateIdSchema.options;
+
+export const isCvTemplateId = (value: string): value is CvTemplateId =>
+  CvTemplateIdSchema.safeParse(value).success;
+
+/**
+ * The language a CV is written in — not the candidate's mother tongue. Drives
+ * the section headings, which the chunker matches on, so both sides of that
+ * contract read the same list.
+ */
+export const CvLanguageSchema = z.enum(['en', 'es']);
+export type CvLanguage = z.infer<typeof CvLanguageSchema>;
+export const CV_LANGUAGES = CvLanguageSchema.options;

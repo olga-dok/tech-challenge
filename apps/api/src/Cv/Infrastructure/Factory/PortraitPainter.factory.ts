@@ -10,6 +10,7 @@ import {
   type PortraitPainter,
 } from '../../Domain/PortraitPainter';
 import { FallbackPortraitPainter } from '../Portrait/FallbackPortraitPainter';
+import { GeminiPortraitPainter } from '../Portrait/GeminiPortraitPainter';
 import { HuggingFacePortraitPainter } from '../Portrait/HuggingFacePortraitPainter';
 import { PollinationsPortraitPainter } from '../Portrait/PollinationsPortraitPainter';
 import { SvgAvatarPainter } from '../Portrait/SvgAvatarPainter';
@@ -33,17 +34,30 @@ export const PortraitPainterFactory: Provider = {
       return svg;
     }
 
-    const remote =
-      config.portrait.provider === 'huggingface'
-        ? new HuggingFacePortraitPainter(
+    // Non-null keys below are safe: the config module rejects a provider whose
+    // key is missing at boot, so an unconfigured provider never reaches here.
+    const remote = ((): PortraitPainter => {
+      switch (config.portrait.provider) {
+        case 'gemini':
+          return new GeminiPortraitPainter(
             transport,
-            // Non-null: the config module refuses provider=huggingface without
-            // a token at boot.
+            config.portrait.apiKey as string,
+            config.portrait.model ?? 'gemini-3.1-flash-image',
+          );
+        case 'huggingface':
+          return new HuggingFacePortraitPainter(
+            transport,
             config.portrait.apiKey as string,
             config.portrait.model ?? 'black-forest-labs/FLUX.1-schnell',
             logger,
-          )
-        : new PollinationsPortraitPainter(transport, config.portrait.model);
+          );
+        default:
+          return new PollinationsPortraitPainter(
+            transport,
+            config.portrait.model,
+          );
+      }
+    })();
 
     return new FallbackPortraitPainter([remote, svg], logger);
   },

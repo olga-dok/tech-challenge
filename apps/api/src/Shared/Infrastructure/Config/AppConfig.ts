@@ -14,7 +14,7 @@ export interface EmbeddingConfig {
 }
 
 export interface PortraitConfig {
-  readonly provider: 'pollinations' | 'huggingface' | 'svg';
+  readonly provider: 'pollinations' | 'gemini' | 'huggingface' | 'svg';
   readonly model: string | null;
   readonly apiKey: string | null;
 }

@@ -6,6 +6,8 @@
     "build": "nest build",
     "dev": "nest start --watch",
     "probe:ai": "ts-node -P tsconfig.json scripts/probe-ai.ts",
+    "preview:cv": "ts-node -P tsconfig.json scripts/preview-cv.ts",
+    "generate:cvs": "ts-node -P tsconfig.json scripts/generate-cvs.ts",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
@@ -22,7 +24,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "test:integration": "jest --config ./test/jest-integration.json"
   },
   "dependencies": {
     "@huggingface/transformers": "^4.2.0",
@@ -31,7 +34,9 @@
     "@nestjs/platform-express": "^11.0.1",
     "@prisma/client": "^6.19.2",
     "@repo/contracts": "workspace:*",
+    "@repo/cv-templates": "workspace:*",
     "dotenv": "^17.4.2",
+    "puppeteer": "^25.8.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "zod": "^4.4.3"
@@ -54,6 +59,7 @@
     "eslint-plugin-prettier": "^5.2.2",
     "globals": "^17.0.0",
     "jest": "^30.0.0",
+    "pdf-parse": "^2.4.5",
     "prettier": "^3.4.2",
     "prisma": "^6.19.2",
     "source-map-support": "^0.5.21",
@@ -72,7 +78,7 @@
       "ts"
     ],
     "rootDir": ".",
-    "testRegex": "test/.*\\.spec\\.ts$",
+    "testRegex": "test/unit/.*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },

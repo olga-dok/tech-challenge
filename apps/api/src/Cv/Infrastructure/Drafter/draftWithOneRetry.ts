@@ -8,6 +8,7 @@ import {
   type ProfilePrompt,
 } from './buildProfilePrompt';
 import { extractJsonObject } from './extractJsonObject';
+import { normaliseProfile } from './normaliseProfile';
 
 export type GenerateText = (prompt: ProfilePrompt) => Promise<string>;
 
@@ -92,7 +93,9 @@ async function attempt(
   const result = CandidateProfileSchema.safeParse(parsed);
 
   if (result.success) {
-    return { profile: result.data, raw, issues: [] };
+    // Ordered here, once, so the stored ground truth and everything derived from
+    // it agree — rather than each template sorting for itself.
+    return { profile: normaliseProfile(result.data), raw, issues: [] };
   }
 
   return {

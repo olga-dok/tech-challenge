@@ -14,6 +14,7 @@ import {
   SPANISH_GIVEN_NAMES,
   SPANISH_SPEAKING_CITIES,
   type CityProfile,
+  type GivenName,
 } from './PersonaCatalogue';
 import { applyPlantedCase } from './PlantedCases';
 import { SeededRandom } from './SeededRandom';
@@ -25,9 +26,9 @@ interface PlanningDecks {
   readonly cvLanguages: CyclicDeck<(typeof CV_LANGUAGE_RING)[number]>;
   readonly spanishCities: CyclicDeck<CityProfile>;
   readonly otherCities: CyclicDeck<CityProfile>;
-  readonly spanishGivenNames: CyclicDeck<string>;
+  readonly spanishGivenNames: CyclicDeck<GivenName>;
   readonly spanishFamilyNames: CyclicDeck<string>;
-  readonly internationalGivenNames: CyclicDeck<string>;
+  readonly internationalGivenNames: CyclicDeck<GivenName>;
   readonly internationalFamilyNames: CyclicDeck<string>;
   readonly traits: CyclicDeck<string>;
 }
@@ -124,7 +125,7 @@ function draw(
     ? decks.spanishCities.next()
     : decks.otherCities.next();
 
-  const givenName = writesInSpanish
+  const given = writesInSpanish
     ? decks.spanishGivenNames.next()
     : decks.internationalGivenNames.next();
   const familyName = writesInSpanish
@@ -139,7 +140,8 @@ function draw(
       : familyProfile.roles;
 
   return {
-    givenName,
+    givenName: given.name,
+    gender: given.gender,
     familyName,
     roleFamily,
     role: random.pick(availableRoles),

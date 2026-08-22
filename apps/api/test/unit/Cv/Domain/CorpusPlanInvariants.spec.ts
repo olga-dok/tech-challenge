@@ -23,7 +23,7 @@ describe('CorpusPlan invariants', () => {
     const failures: string[] = [];
 
     for (let seed = 0; seed < 120; seed += 1) {
-      const { personas } = CorpusPlan.build(30, seed);
+      const { personas } = CorpusPlan.build(25, seed);
       const report = (problem: string): number =>
         failures.push(`seed ${String(seed)}: ${problem}`);
 

@@ -7,5 +7,6 @@ allowBuilds:
   onnxruntime-node: true
   prisma: true
   protobufjs: true
+  puppeteer: true
   sharp: true
   unrs-resolver: true

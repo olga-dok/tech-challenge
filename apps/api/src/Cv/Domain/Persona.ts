@@ -1,14 +1,21 @@
 // Types only, so the domain layer stays free of runtime dependencies while the
 // enums that cross the API boundary keep their single definition in contracts.
-import type { RoleFamily, Seniority } from '@repo/contracts';
+import type { CvLanguage, RoleFamily, Seniority } from '@repo/contracts';
 import { InvalidPersonaError } from './InvalidPersonaError';
 
-/** The language the CV itself is written in — not the candidate's mother tongue. */
-export type CvLanguage = 'en' | 'es';
+/**
+ * Decided by the plan, never inferred from a name.
+ *
+ * It exists because two things downstream need it and cannot guess it well: the
+ * portrait has to match the person on the page, and Spanish job titles are
+ * gendered. Names are a poor proxy for either.
+ */
+export type PersonaGender = 'female' | 'male';
 
 export interface PersonaAttributes {
   readonly givenName: string;
   readonly familyName: string;
+  readonly gender: PersonaGender;
   readonly roleFamily: RoleFamily;
   readonly role: string;
   readonly seniority: Seniority;
@@ -45,6 +52,7 @@ const MAX_YEARS_EXPERIENCE = 45;
 export class Persona {
   readonly givenName: string;
   readonly familyName: string;
+  readonly gender: PersonaGender;
   readonly roleFamily: RoleFamily;
   readonly role: string;
   readonly seniority: Seniority;
@@ -62,6 +70,7 @@ export class Persona {
 
     this.givenName = attributes.givenName;
     this.familyName = attributes.familyName;
+    this.gender = attributes.gender;
     this.roleFamily = attributes.roleFamily;
     this.role = attributes.role;
     this.seniority = attributes.seniority;
@@ -107,6 +116,7 @@ export class Persona {
   private identity(): string {
     return [
       this.fullName,
+      this.gender,
       this.roleFamily,
       this.role,
       this.seniority,

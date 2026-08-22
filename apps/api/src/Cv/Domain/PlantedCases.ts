@@ -33,6 +33,7 @@ export const PLANTED_TRAITS = {
 } as const;
 
 export const PLANTED_GIVEN_NAME = 'Ana';
+export const PLANTED_GIVEN_NAME_GENDER = 'female' as const;
 
 export const UPC_INSTITUTION = 'Universitat Politècnica de Catalunya (UPC)';
 
@@ -73,7 +74,11 @@ export function applyPlantedCase(
       // which cannot repeat a pairing inside a corpus this size, so the two are
       // guaranteed to differ.
       return withTrait(
-        { ...attributes, givenName: PLANTED_GIVEN_NAME },
+        {
+          ...attributes,
+          givenName: PLANTED_GIVEN_NAME,
+          gender: PLANTED_GIVEN_NAME_GENDER,
+        },
         PLANTED_TRAITS.sharedGivenName,
       );
 

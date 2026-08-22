@@ -23,8 +23,15 @@ export {
   type GenerateCorpusRequestDto,
 } from './corpus';
 export {
+  CV_LANGUAGES,
   CV_SECTIONS,
+  CV_TEMPLATE_IDS,
+  CvLanguageSchema,
   CvSectionSchema,
+  CvTemplateIdSchema,
+  isCvTemplateId,
+  type CvLanguage,
+  type CvTemplateId,
   LANGUAGE_LEVELS,
   LanguageLevelSchema,
   ROLE_FAMILIES,

@@ -10,7 +10,7 @@ grounded, cited answers.
 
 The product is one screen with two halves that talk to each other:
 
-- **Generate + browse** — one button builds 30 fake CVs; progress streams live and a candidate card
+- **Generate + browse** — one button builds 25 fake CVs; progress streams live and a candidate card
   (portrait, name, headline, skills) appears as each CV finishes. The gallery is paginated.
 - **Ask** — the chat answers from the corpus with citations, *and* the gallery filters and reorders
   itself to the ranked candidates behind that answer. The chat is the query language for the
@@ -38,8 +38,9 @@ Three pipelines back it:
 **Every AI dependency runs on a free tier, and each sits behind a port so it can be swapped in one
 file.** Defaults: Gemini 3.5 Flash (free AI Studio key) or an OpenRouter free model for text;
 **local `@huggingface/transformers` + `multilingual-e5-small` (384 dims) for embeddings** — no quota, no network,
-which is what makes re-indexing cheap enough to iterate on; Pollinations for portraits, falling back
-to Hugging Face's free tier and then to a deterministic local SVG avatar. Nothing in the pipeline may
+which is what makes re-indexing cheap enough to iterate on; Pollinations for portraits (keyless, though only
+its stylised SANA model remains — `gemini` or Hugging Face for photorealism), falling back
+to a deterministic local SVG avatar. Nothing in the pipeline may
 fail because a free service was slow or rate-limited.
 
 ## Repository Layout
@@ -358,7 +359,7 @@ Run from the repo root unless noted.
 | `pnpm test` | Full test suite |
 | `pnpm db:up` / `db:down` / `db:reset` | Postgres + pgvector via docker-compose |
 | `pnpm db:migrate` / `db:migrate:dev` / `db:studio` / `db:generate` | Prisma migrations, studio, client generation |
-| `pnpm generate:cvs -- --size 30 --seed 42` | Run the CV generation pipeline from the terminal (the UI button does the same thing) |
+| `pnpm generate:cvs -- --size 25 --seed 42` | Run the CV generation pipeline from the terminal (the UI button does the same thing) |
 | `pnpm ingest:cvs` | Re-extract, chunk, embed, and index the existing PDFs |
 | `pnpm eval` | Run the offline evaluation harness |
 

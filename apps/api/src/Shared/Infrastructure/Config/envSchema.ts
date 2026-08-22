@@ -17,7 +17,11 @@ const EMBEDDING_DEFAULTS = {
 } as const;
 
 const PORTRAIT_DEFAULT_MODELS = {
-  pollinations: 'flux',
+  // `flux` is gone: Pollinations' anonymous tier now serves only `sana`, which
+  // returns illustrations rather than photographs whatever the prompt says. It
+  // stays the keyless default; `gemini` is the free photorealistic one.
+  pollinations: 'sana',
+  gemini: 'gemini-3.1-flash-image',
   huggingface: 'black-forest-labs/FLUX.1-schnell',
   svg: null,
 } as const;
@@ -68,7 +72,7 @@ export const rawEnvSchema = z.object({
   EMBEDDING_DIMENSIONS: integerFromEnv(64, 2000).optional(),
 
   PORTRAIT_PROVIDER: z
-    .enum(['pollinations', 'huggingface', 'svg'])
+    .enum(['pollinations', 'gemini', 'huggingface', 'svg'])
     .default('pollinations'),
   PORTRAIT_MODEL: optionalString,
   HUGGINGFACE_API_KEY: optionalString,
@@ -77,7 +81,7 @@ export const rawEnvSchema = z.object({
   GENERATION_BATCH_DELAY_MS: integerFromEnv(0, 120_000).default(1_500),
   GENERATION_BATCH_BACKOFF_FACTOR: z.coerce.number().min(1).max(10).default(2),
   GENERATION_MAX_BATCH_DELAY_MS: integerFromEnv(0, 600_000).default(60_000),
-  CORPUS_DEFAULT_SIZE: integerFromEnv(1, 40).default(30),
+  CORPUS_DEFAULT_SIZE: integerFromEnv(1, 40).default(25),
   CORPUS_SEED: integerFromEnv(0, Number.MAX_SAFE_INTEGER).default(42),
 
   LANGFUSE_PUBLIC_KEY: optionalString,
@@ -135,6 +139,14 @@ export function collectProviderProblems(
     });
   }
 
+  if (portraitProvider === 'gemini' && !present(source.GOOGLE_API_KEY)) {
+    problems.push({
+      variable: 'GOOGLE_API_KEY',
+      message:
+        'is required when PORTRAIT_PROVIDER=gemini — the same free AI Studio key the text model uses',
+    });
+  }
+
   if (
     portraitProvider === 'huggingface' &&
     !present(source.HUGGINGFACE_API_KEY)
@@ -156,6 +168,18 @@ export function collectProviderProblems(
   }
 
   return problems;
+}
+
+/** Each portrait provider draws its key from a different place, or needs none. */
+function portraitApiKey(env: RawEnv): string | null {
+  switch (env.PORTRAIT_PROVIDER) {
+    case 'huggingface':
+      return env.HUGGINGFACE_API_KEY as string;
+    case 'gemini':
+      return env.GOOGLE_API_KEY as string;
+    default:
+      return null;
+  }
 }
 
 export function toAppConfig(env: RawEnv, baseDir: string): AppConfig {
@@ -195,10 +219,7 @@ export function toAppConfig(env: RawEnv, baseDir: string): AppConfig {
       provider: env.PORTRAIT_PROVIDER,
       model:
         env.PORTRAIT_MODEL ?? PORTRAIT_DEFAULT_MODELS[env.PORTRAIT_PROVIDER],
-      apiKey:
-        env.PORTRAIT_PROVIDER === 'huggingface'
-          ? (env.HUGGINGFACE_API_KEY as string)
-          : null,
+      apiKey: portraitApiKey(env),
     },
     generation: {
       batchSize: env.GENERATION_BATCH_SIZE,

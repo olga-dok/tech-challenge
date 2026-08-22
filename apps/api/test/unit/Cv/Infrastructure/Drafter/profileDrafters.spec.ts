@@ -1,3 +1,4 @@
+import { isRateLimited } from '../../../../../src/Cv/Domain/isRateLimited';
 import { ProfileDraftingError } from '../../../../../src/Cv/Domain/ProfileDraftingError';
 import { GeminiProfileDrafter } from '../../../../../src/Cv/Infrastructure/Drafter/GeminiProfileDrafter';
 import { OpenRouterProfileDrafter } from '../../../../../src/Cv/Infrastructure/Drafter/OpenRouterProfileDrafter';
@@ -131,6 +132,48 @@ describe('GeminiProfileDrafter', () => {
     expect(error).toBeInstanceOf(ProfileDraftingError);
     expect((error as Error).message).toContain('SAFETY');
     expect(calls).toHaveLength(1);
+  });
+
+  it('marks a quota refusal so the pipeline paces itself instead of just failing', async () => {
+    const fetchImpl = (() =>
+      Promise.resolve(
+        new Response('{"error":{"code":429,"message":"quota exceeded"}}', {
+          status: 429,
+        }),
+      )) as unknown as Fetch;
+
+    const error = await caughtRejection(() =>
+      new GeminiProfileDrafter(
+        GEMINI_CONFIG,
+        new HttpTransport(fetchImpl, undefined, {
+          sleep: () => Promise.resolve(),
+        }),
+      ).draft(persona),
+    );
+
+    // Without the mark, a whole corpus run can fail on quota and never emit a
+    // single `throttled` event or lengthen its pacing — which is exactly what a
+    // real thirty-CV run did before this was wired up.
+    expect(error).toBeInstanceOf(ProfileDraftingError);
+    expect(isRateLimited(error)).toBe(true);
+  });
+
+  it('does not mark an ordinary failure as a rate limit', async () => {
+    const fetchImpl = (() =>
+      Promise.resolve(
+        new Response('bad key', { status: 401 }),
+      )) as unknown as Fetch;
+
+    const error = await caughtRejection(() =>
+      new GeminiProfileDrafter(
+        GEMINI_CONFIG,
+        new HttpTransport(fetchImpl, undefined, {
+          sleep: () => Promise.resolve(),
+        }),
+      ).draft(persona),
+    );
+
+    expect(isRateLimited(error)).toBe(false);
   });
 
   it('wraps a transport failure as a drafting failure for this candidate', async () => {

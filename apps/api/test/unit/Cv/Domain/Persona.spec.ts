@@ -8,6 +8,7 @@ import { caughtError } from '../../../support/caughtError';
 const ATTRIBUTES: PersonaAttributes = {
   givenName: 'Ana',
   familyName: 'Ruiz',
+  gender: 'female',
   roleFamily: 'BACKEND',
   role: 'Senior Backend Engineer',
   seniority: 'SENIOR',

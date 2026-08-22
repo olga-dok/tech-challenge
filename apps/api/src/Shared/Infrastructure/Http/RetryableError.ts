@@ -9,6 +9,17 @@ import { BaseError } from '../../Domain';
  * is what keeps a 400 from being asked four times.
  */
 export class RetryableError extends BaseError {
+  /**
+   * Marks a quota refusal for anyone up the stack.
+   *
+   * The generation pipeline has to tell "the free tier said slow down" from
+   * "this request was wrong": the first means pace yourself and report waiting,
+   * the second means report a failure. It cannot read HTTP status codes from the
+   * Application layer, so the status is translated into this flag here and read
+   * back by `isRateLimited`.
+   */
+  readonly rateLimited: boolean;
+
   private constructor(
     message: string,
     readonly status: number | null,
@@ -17,6 +28,7 @@ export class RetryableError extends BaseError {
     readonly cause?: unknown,
   ) {
     super(message);
+    this.rateLimited = status === 429;
   }
 
   static fromStatus(

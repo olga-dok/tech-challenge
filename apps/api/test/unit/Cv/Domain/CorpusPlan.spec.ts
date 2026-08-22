@@ -14,7 +14,7 @@ import {
 import { caughtError } from '../../../support/caughtError';
 
 const DEMO_SEED = 42;
-const DEMO_SIZE = 30;
+const DEMO_SIZE = 25;
 
 const plan = (size = DEMO_SIZE, seed = DEMO_SEED): readonly Persona[] =>
   CorpusPlan.build(size, seed).personas;
@@ -53,7 +53,7 @@ describe('CorpusPlan', () => {
     });
   });
 
-  describe('diversity invariants at size 30', () => {
+  describe('diversity invariants at the demo size', () => {
     it('spreads across at least five role families', () => {
       const families = distinct(plan().map((persona) => persona.roleFamily));
 
@@ -115,6 +115,25 @@ describe('CorpusPlan', () => {
         const [min, max] = bounds[persona.seniority];
         expect(persona.yearsExperience).toBeGreaterThanOrEqual(min);
         expect(persona.yearsExperience).toBeLessThanOrEqual(max);
+      }
+    });
+
+    it('includes both genders, without one dominating', () => {
+      // Dealt, not inferred: the portrait painter and the Spanish job titles
+      // both depend on it, and a name is a poor guess for either.
+      const women = plan().filter((persona) => persona.gender === 'female');
+
+      expect(women.length).toBeGreaterThanOrEqual(8);
+      expect(women.length).toBeLessThanOrEqual(plan().length - 8);
+    });
+
+    it('keeps a candidate gender consistent with the name they were dealt', () => {
+      const genderByName = new Map<string, string>();
+
+      for (const persona of plan()) {
+        const seen = genderByName.get(persona.givenName);
+        expect(seen ?? persona.gender).toBe(persona.gender);
+        genderByName.set(persona.givenName, persona.gender);
       }
     });
 

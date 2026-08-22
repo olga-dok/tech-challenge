@@ -96,9 +96,9 @@ describe('CandidateProfileSchema', () => {
 });
 
 describe('request schemas', () => {
-  it('defaults a corpus request to 30 unforced CVs', () => {
+  it('defaults a corpus request to 25 unforced CVs', () => {
     expect(GenerateCorpusRequestSchema.parse({})).toEqual({
-      size: 30,
+      size: 25,
       force: false,
     });
   });

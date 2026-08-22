@@ -21,7 +21,7 @@ export const GenerateCorpusRequestSchema = z.object({
    * self-describing for any client; `CORPUS_DEFAULT_SIZE` is the CLI's default,
    * where there is no request body to carry one.
    */
-  size: z.number().int().min(1).max(40).default(30),
+  size: z.number().int().min(1).max(40).default(25),
   /** Omitted means "use CORPUS_SEED", so a demo run is reproducible by default. */
   seed: z.number().int().min(0).optional(),
   /**

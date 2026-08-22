@@ -7,6 +7,7 @@ export const personaFixture = (
   Persona.from({
     givenName: 'Ana',
     familyName: 'Ruiz',
+    gender: 'female',
     roleFamily: 'BACKEND',
     role: 'Senior Backend Engineer',
     seniority: 'SENIOR',
