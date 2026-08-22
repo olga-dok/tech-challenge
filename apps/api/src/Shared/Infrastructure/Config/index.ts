@@ -13,5 +13,5 @@ export {
   type ConfigProblem,
   InvalidConfigurationError,
 } from './InvalidConfigurationError';
-export { loadAppConfig } from './loadAppConfig';
+export { loadAppConfig, loadConfigFromEnvironment } from './loadAppConfig';
 export { loadEnvFiles } from './loadEnvFiles';

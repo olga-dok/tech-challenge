@@ -6,6 +6,7 @@
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
+    "probe:ai": "pnpm --filter api probe:ai",
     "lint": "turbo lint",
     "lint:fix": "pnpm --recursive --if-present lint:fix",
     "test": "turbo test",

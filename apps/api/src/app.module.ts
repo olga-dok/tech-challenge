@@ -1,5 +1,7 @@
 import { type DynamicModule, Module } from '@nestjs/common';
+import { CvModule } from './Cv/Infrastructure/CvModule';
 import { type AppConfig, ConfigModule } from './Shared/Infrastructure/Config';
+import { LoggerModule } from './Shared/Infrastructure/Logging';
 import { PrismaModule } from './Shared/Infrastructure/Prisma';
 
 /**
@@ -12,7 +14,12 @@ export class AppModule {
   static forConfig(config: AppConfig): DynamicModule {
     return {
       module: AppModule,
-      imports: [ConfigModule.forConfig(config), PrismaModule],
+      imports: [
+        ConfigModule.forConfig(config),
+        LoggerModule,
+        PrismaModule,
+        CvModule,
+      ],
     };
   }
 }

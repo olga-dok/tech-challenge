@@ -39,7 +39,7 @@ describe('loadAppConfig', () => {
       expect(config.llm).toMatchObject({
         provider: 'gemini',
         apiKey: 'test-google-key',
-        textModel: 'gemini-2.5-flash',
+        textModel: 'gemini-3.5-flash',
       });
       expect(config.embedding).toMatchObject({
         provider: 'local',
@@ -180,7 +180,7 @@ describe('loadAppConfig', () => {
     it('falls back to the default model when the override is blank', () => {
       const config = loadAppConfig(envWith({ LLM_TEXT_MODEL: '' }));
 
-      expect(config.llm.textModel).toBe('gemini-2.5-flash');
+      expect(config.llm.textModel).toBe('gemini-3.5-flash');
     });
   });
 

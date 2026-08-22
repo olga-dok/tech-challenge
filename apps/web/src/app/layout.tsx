@@ -18,7 +18,14 @@ export const metadata: Metadata = {
     "Generate a corpus of CVs and ask grounded questions about the candidates.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: {
+  // Spelled out rather than using Next's generated `LayoutProps<"/">`: that type
+  // only exists once `.next/types` has been generated, which made `tsc --noEmit`
+  // fail on a clean checkout.
+  children: React.ReactNode;
+}) {
   return (
     <html
       lang="en"

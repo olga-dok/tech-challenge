@@ -4,5 +4,8 @@ packages:
 allowBuilds:
   '@prisma/client': true
   '@prisma/engines': true
+  onnxruntime-node: true
   prisma: true
+  protobufjs: true
+  sharp: true
   unrs-resolver: true

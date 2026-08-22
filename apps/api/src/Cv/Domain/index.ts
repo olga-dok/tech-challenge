@@ -1,4 +1,6 @@
 export { CorpusPlan, MAX_CORPUS_SIZE } from './CorpusPlan';
+export { EmbedderId, type Embedder } from './Embedder';
+export { EmbeddingFailedError } from './EmbeddingFailedError';
 export { CyclicDeck } from './CyclicDeck';
 export { InvalidCorpusPlanError } from './InvalidCorpusPlanError';
 export { InvalidPersonaError } from './InvalidPersonaError';
@@ -12,6 +14,14 @@ export {
   type RoleFamilyProfile,
   type SeniorityTier,
 } from './PersonaCatalogue';
+export {
+  PortraitPainterId,
+  type PortraitImage,
+  type PortraitPainter,
+} from './PortraitPainter';
+export { PortraitPaintingError } from './PortraitPaintingError';
+export { ProfileDrafterId, type ProfileDrafter } from './ProfileDrafter';
+export { ProfileDraftingError } from './ProfileDraftingError';
 export {
   PLANTED_CASE_INDEXES,
   PLANTED_GIVEN_NAME,

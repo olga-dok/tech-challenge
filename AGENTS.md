@@ -33,11 +33,11 @@ Three pipelines back it:
 | Database | PostgreSQL 17 + `pgvector`, accessed via Prisma |
 | Client state | SWR for cached reads, zustand for the shared gallery filter |
 | Validation | zod (shared schemas in `@repo/contracts`) |
-| Testing | Jest (+ `jest-mock-extended` for ports), React Testing Library |
+| Testing | Jest (typed hand-written port stubs), React Testing Library |
 
 **Every AI dependency runs on a free tier, and each sits behind a port so it can be swapped in one
-file.** Defaults: Gemini 2.5 Flash (free AI Studio key) or an OpenRouter free model for text;
-**local `fastembed` + `multilingual-e5-small` (384 dims) for embeddings** — no quota, no network,
+file.** Defaults: Gemini 3.5 Flash (free AI Studio key) or an OpenRouter free model for text;
+**local `@huggingface/transformers` + `multilingual-e5-small` (384 dims) for embeddings** — no quota, no network,
 which is what makes re-indexing cheap enough to iterate on; Pollinations for portraits, falling back
 to Hugging Face's free tier and then to a deterministic local SVG avatar. Nothing in the pipeline may
 fail because a free service was slow or rate-limited.
@@ -336,7 +336,7 @@ with real logic.
 | Layer | What to test | How |
 | --- | --- | --- |
 | `Domain/` | Rank fusion, chunking, persona planning, value-object validation | Pure unit tests, no mocks needed |
-| `Application/` | Use case orchestration, error paths, idempotency | Unit tests with ports mocked via `jest-mock-extended` |
+| `Application/` | Use case orchestration, error paths, idempotency | Unit tests with the ports stubbed |
 | `Infrastructure/` | SQL correctness, retrieval arms, transactional rollback | Integration tests against a real Postgres+pgvector |
 | `components/` | Rendering, interaction, streaming state transitions | React Testing Library — behaviour, not implementation |
 

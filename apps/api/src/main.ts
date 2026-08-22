@@ -2,16 +2,14 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import {
   InvalidConfigurationError,
-  loadAppConfig,
-  loadEnvFiles,
+  loadConfigFromEnvironment,
 } from './Shared/Infrastructure/Config';
 
 async function bootstrap(): Promise<void> {
   // Order matters: the environment is loaded and validated before the Nest
   // application exists, so a configuration problem is reported as itself rather
   // than as a dependency-resolution failure inside the DI graph.
-  loadEnvFiles();
-  const config = loadAppConfig(process.env);
+  const config = loadConfigFromEnvironment();
 
   const app = await NestFactory.create(AppModule.forConfig(config));
   await app.listen(config.port);
