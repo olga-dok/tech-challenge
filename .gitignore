@@ -13,6 +13,14 @@ out/
 dist/
 build/
 
+# Generated corpus: PDFs, portraits and profile JSON. Regenerate with the UI
+# button or `pnpm generate:cvs` — these are outputs, not sources.
+# The directory negation is load-bearing: without it git never descends into
+# the subdirectories, so the .gitkeep negation below can never match.
+apps/api/storage/**/*
+!apps/api/storage/**/
+!apps/api/storage/**/.gitkeep
+
 # Environment variables
 .env
 .env.local

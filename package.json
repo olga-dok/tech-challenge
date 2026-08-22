@@ -9,7 +9,10 @@
     "lint": "turbo lint",
     "lint:fix": "pnpm --recursive --if-present lint:fix",
     "test": "turbo test",
-    "typecheck": "turbo typecheck"
+    "typecheck": "turbo typecheck",
+    "db:up": "docker compose up -d --wait",
+    "db:down": "docker compose down",
+    "db:reset": "docker compose down -v && pnpm db:up"
   },
   "devDependencies": {
     "turbo": "^2.10.11"

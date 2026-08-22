@@ -1,8 +1,17 @@
 {
-  "extends": "@repo/typescript-config/base",
+  "extends": "./base.json",
   "compilerOptions": {
     "lib": ["esnext"],
     "module": "NodeNext",
-    "moduleResolution": "NodeNext"
+    "moduleResolution": "NodeNext",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "declaration": true,
+    "sourceMap": true,
+    "incremental": true,
+    // Node apps emit to dist; the base preset disables emit for the
+    // typecheck-only packages. The `typecheck` script passes --noEmit on the
+    // command line, which overrides this.
+    "noEmit": false
   }
 }
