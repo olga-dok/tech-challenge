@@ -9,8 +9,14 @@
       "cache": false,
       "persistent": true
     },
-    "lint": {},
-    "test": {},
-    "typecheck": {}
+    "lint": {
+      "dependsOn": ["^build"]
+    },
+    "test": {
+      "dependsOn": ["^build"]
+    },
+    "typecheck": {
+      "dependsOn": ["^build"]
+    }
   }
 }
