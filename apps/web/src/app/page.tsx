@@ -64,9 +64,7 @@ export default function Home() {
             Documentation
           </a>
           <Button>Test button</Button>
-          <Button variant="secondary">
-            Secondary
-          </Button>
+          <Button variant="secondary">Secondary</Button>
         </div>
       </main>
     </div>
