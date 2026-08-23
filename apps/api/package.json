@@ -8,6 +8,7 @@
     "probe:ai": "ts-node -P tsconfig.json scripts/probe-ai.ts",
     "preview:cv": "ts-node -P tsconfig.json scripts/preview-cv.ts",
     "generate:cvs": "ts-node -P tsconfig.json scripts/generate-cvs.ts",
+    "ingest:cvs": "ts-node -P tsconfig.json scripts/ingest-cvs.ts",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",

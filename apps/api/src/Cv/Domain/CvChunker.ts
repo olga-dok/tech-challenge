@@ -245,6 +245,34 @@ const mergeSmallPieces = (pieces: Piece[]): Piece[] => {
 
 const firstLine = (text: string): string => text.split('\n')[0].trim();
 
+const LANGUAGES: readonly CvLanguage[] = ['en', 'es'];
+
+/**
+ * Ingestion has no persona to read a CV's rendering language off of — a PDF
+ * could come from anywhere — so the language is detected from the document
+ * itself: whichever language's headings match more lines wins. Ties and
+ * documents with no recognizable heading at all default to English.
+ */
+export const detectCvLanguage = (rawText: string): CvLanguage => {
+  const lines = rawText.split('\n');
+
+  let best: CvLanguage = 'en';
+  let bestCount = -1;
+
+  for (const language of LANGUAGES) {
+    const count = lines.filter(
+      (line) => matchHeading(line, language) !== null,
+    ).length;
+
+    if (count > bestCount) {
+      best = language;
+      bestCount = count;
+    }
+  }
+
+  return best;
+};
+
 /**
  * Section-aware, not fixed-window: a citation should point at one job or one
  * degree, not an arbitrary slice of the document. Every chunk is prefixed

@@ -7,6 +7,7 @@ import type {
 } from '@repo/contracts';
 import type { PrismaConnection } from '../../../Shared/Infrastructure/Prisma';
 import { Candidate } from '../../Domain/Candidate';
+import type { EmbeddedCvChunk } from '../../Domain/CvChunk';
 import type { CvRepository } from '../../Domain/CvRepository';
 import { Slug } from '../../Domain/Slug';
 
@@ -31,6 +32,7 @@ interface CandidateRow {
   sourceChecksum: string;
   createdAt: Date;
   ingestedAt: Date | null;
+  contentHash: string | null;
 }
 
 export class PrismaCvRepository implements CvRepository {
@@ -99,6 +101,51 @@ export class PrismaCvRepository implements CvRepository {
     return this.prisma.candidate.count();
   }
 
+  async findAll(): Promise<Candidate[]> {
+    const rows = await this.prisma.candidate.findMany();
+
+    return rows.map((row) => this.buildCandidate(row));
+  }
+
+  /**
+   * Delete-then-insert plus the contentHash/ingestedAt stamp, all in one
+   * transaction: a partial embedding failure must never leave a candidate
+   * half-indexed, so the old chunks are only gone once the new ones (and the
+   * stamp) have committed alongside them.
+   *
+   * The insert is raw SQL because `embedding` is declared `Unsupported("vector")`
+   * in schema.prisma — the typed client has no column to write it through, so
+   * the vector literal and its `::vector` cast are hand-written here, the one
+   * place the ORM leaks.
+   */
+  async replaceChunks(
+    candidateId: string,
+    contentHash: string,
+    chunks: readonly EmbeddedCvChunk[],
+  ): Promise<void> {
+    await this.prisma.$transaction([
+      this.prisma.cvChunk.deleteMany({ where: { candidateId } }),
+      ...chunks.map(
+        (chunk) => this.prisma.$executeRaw`
+          INSERT INTO "CvChunk" (id, "candidateId", section, ordinal, content, "tokenCount", embedding)
+          VALUES (
+            gen_random_uuid(),
+            ${candidateId}::uuid,
+            ${chunk.section}::"CvSection",
+            ${chunk.ordinal},
+            ${chunk.content},
+            ${chunk.tokenCount},
+            ${`[${chunk.embedding.join(',')}]`}::vector
+          )
+        `,
+      ),
+      this.prisma.candidate.update({
+        where: { id: candidateId },
+        data: { contentHash, ingestedAt: new Date() },
+      }),
+    ]);
+  }
+
   /**
    * Rows in, domain objects out — a Prisma model never crosses this boundary.
    *
@@ -122,6 +169,7 @@ export class PrismaCvRepository implements CvRepository {
       sourceChecksum: row.sourceChecksum,
       createdAt: row.createdAt,
       ingestedAt: row.ingestedAt,
+      contentHash: row.contentHash,
     });
   }
 }

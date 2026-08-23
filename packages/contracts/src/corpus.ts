@@ -34,3 +34,13 @@ export const GenerateCorpusRequestSchema = z.object({
 export type GenerateCorpusRequestDto = z.infer<
   typeof GenerateCorpusRequestSchema
 >;
+
+export const IngestCorpusRequestSchema = z.object({
+  /**
+   * Re-embed every candidate even if its content hash is unchanged. Off by
+   * default, which is what makes re-running ingestion on an unchanged corpus
+   * cost zero embedding work.
+   */
+  force: z.boolean().default(false),
+});
+export type IngestCorpusRequestDto = z.infer<typeof IngestCorpusRequestSchema>;

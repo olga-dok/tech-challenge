@@ -76,6 +76,10 @@ model Candidate {
   createdAt  DateTime  @default(now())
   ingestedAt DateTime?
 
+  /// sha256 of the last-extracted PDF text. Lets ingestion skip re-embedding an
+  /// unchanged CV entirely rather than comparing chunk-by-chunk.
+  contentHash String?
+
   chunks CvChunk[]
 
   @@index([roleFamily])

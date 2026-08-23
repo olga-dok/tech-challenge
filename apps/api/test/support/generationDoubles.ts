@@ -1,6 +1,7 @@
 import type { CandidateProfile } from '@repo/contracts';
 import { sampleProfile } from '@repo/cv-templates';
 import { Candidate } from '../../src/Cv/Domain/Candidate';
+import type { EmbeddedCvChunk } from '../../src/Cv/Domain/CvChunk';
 import type { CvRepository } from '../../src/Cv/Domain/CvRepository';
 import type { CvStorage, StoredCvFiles } from '../../src/Cv/Domain/CvStorage';
 import type { PdfRenderer } from '../../src/Cv/Domain/PdfRenderer';
@@ -86,8 +87,15 @@ export const storageStub = (): StorageStub => {
   };
 };
 
+export interface ReplaceChunksCall {
+  readonly candidateId: string;
+  readonly contentHash: string;
+  readonly chunks: readonly EmbeddedCvChunk[];
+}
+
 export interface RepositoryStub extends CvRepository {
   readonly saved: Candidate[];
+  readonly replaceChunksCalls: ReplaceChunksCall[];
   seed(candidate: Candidate): void;
 }
 
@@ -95,12 +103,14 @@ export interface RepositoryStub extends CvRepository {
 export const repositoryStub = (): RepositoryStub => {
   const bySlug = new Map<string, Candidate>();
   const byChecksum = new Map<string, Candidate>();
+  const byId = new Map<string, Candidate>();
   const saved: Candidate[] = [];
+  const replaceChunksCalls: ReplaceChunksCall[] = [];
 
   const remember = (candidate: Candidate): Candidate => {
     // Persisting assigns the id, which is what a summary needs.
     const persisted = Candidate.fromAttributes({
-      id: `id-${candidate.slug.value}`,
+      id: candidate.id ?? `id-${candidate.slug.value}`,
       slug: candidate.slug,
       profile: candidate.profile,
       persona: candidate.persona,
@@ -109,16 +119,21 @@ export const repositoryStub = (): RepositoryStub => {
       sourceChecksum: candidate.sourceChecksum,
       createdAt: new Date(0),
       ingestedAt: candidate.ingestedAt,
+      contentHash: candidate.contentHash,
     });
 
     bySlug.set(persisted.slug.value, persisted);
     byChecksum.set(persisted.sourceChecksum, persisted);
+    // Non-null: every candidate reaching this map came through `remember`,
+    // which always assigns an id.
+    byId.set(persisted.id as string, persisted);
 
     return persisted;
   };
 
   return {
     saved,
+    replaceChunksCalls,
     seed: (candidate) => {
       remember(candidate);
     },
@@ -133,6 +148,30 @@ export const repositoryStub = (): RepositoryStub => {
       return Promise.resolve(persisted);
     },
     countAll: () => Promise.resolve(bySlug.size),
+    findAll: () => Promise.resolve([...byId.values()]),
+    replaceChunks: (candidateId, contentHash, chunks) => {
+      replaceChunksCalls.push({ candidateId, contentHash, chunks });
+
+      const existing = byId.get(candidateId);
+      if (existing) {
+        remember(
+          Candidate.fromAttributes({
+            id: existing.id,
+            slug: existing.slug,
+            profile: existing.profile,
+            persona: existing.persona,
+            files: existing.files,
+            templateId: existing.templateId,
+            sourceChecksum: existing.sourceChecksum,
+            createdAt: new Date(0),
+            ingestedAt: new Date(),
+            contentHash,
+          }),
+        );
+      }
+
+      return Promise.resolve();
+    },
   };
 };
 

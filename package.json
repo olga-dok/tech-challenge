@@ -8,6 +8,7 @@
     "dev": "turbo dev",
     "probe:ai": "pnpm --filter api probe:ai",
     "generate:cvs": "pnpm --filter api generate:cvs",
+    "ingest:cvs": "pnpm --filter api ingest:cvs",
     "lint": "turbo lint",
     "lint:fix": "pnpm --recursive --if-present lint:fix",
     "test": "turbo test",

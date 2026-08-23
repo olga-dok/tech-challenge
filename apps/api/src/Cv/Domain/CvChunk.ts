@@ -12,3 +12,8 @@ export interface CvChunk {
   readonly content: string;
   readonly tokenCount: number;
 }
+
+/** A chunk plus the vector the embedder produced for its content — what the repository persists. */
+export interface EmbeddedCvChunk extends CvChunk {
+  readonly embedding: readonly number[];
+}

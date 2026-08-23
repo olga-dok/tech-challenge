@@ -128,4 +128,72 @@ describe('PrismaCvRepository', () => {
   it('returns null rather than throwing for a slug nobody has', async () => {
     expect(await repository.findBySlug(Slug.from('it-nobody-here'))).toBeNull();
   });
+
+  it('finds every stored candidate, which is what ingestion iterates over', async () => {
+    await repository.save(candidateFor(personaA));
+    await repository.save(candidateFor(personaB));
+
+    const all = await repository.findAll();
+    const ours = all.filter((candidate) =>
+      candidate.slug.value.startsWith('it-'),
+    );
+
+    expect(ours).toHaveLength(2);
+  });
+
+  it('replaces a candidate chunk set and stamps contentHash/ingestedAt', async () => {
+    const saved = await repository.save(candidateFor(personaA));
+    // Non-null: just persisted.
+    const candidateId = saved.id as string;
+
+    await repository.replaceChunks(candidateId, 'hash-v1', [
+      {
+        section: 'SUMMARY',
+        ordinal: 0,
+        content: 'Ana Ruiz — SUMMARY\nFirst version.',
+        tokenCount: 5,
+        embedding: Array.from({ length: 384 }, () => 0.1),
+      },
+    ]);
+
+    const chunksV1 = await prisma.cvChunk.findMany({
+      where: { candidateId },
+    });
+    expect(chunksV1).toHaveLength(1);
+    expect(chunksV1[0].content).toBe('Ana Ruiz — SUMMARY\nFirst version.');
+
+    const afterFirstIngest = await repository.findBySlug(saved.slug);
+    expect(afterFirstIngest?.contentHash).toBe('hash-v1');
+    expect(afterFirstIngest?.isIngested()).toBe(true);
+
+    // A second call fully replaces the chunk set — old ordinals gone, not
+    // accumulated alongside the new ones.
+    await repository.replaceChunks(candidateId, 'hash-v2', [
+      {
+        section: 'SUMMARY',
+        ordinal: 0,
+        content: 'Ana Ruiz — SUMMARY\nSecond version.',
+        tokenCount: 5,
+        embedding: Array.from({ length: 384 }, () => 0.2),
+      },
+      {
+        section: 'SKILLS',
+        ordinal: 1,
+        content: 'Ana Ruiz — SKILLS\nTypeScript.',
+        tokenCount: 4,
+        embedding: Array.from({ length: 384 }, () => 0.3),
+      },
+    ]);
+
+    const chunksV2 = await prisma.cvChunk.findMany({
+      where: { candidateId },
+      orderBy: { ordinal: 'asc' },
+    });
+    expect(chunksV2).toHaveLength(2);
+    expect(chunksV2[0].content).toBe('Ana Ruiz — SUMMARY\nSecond version.');
+    expect(chunksV2[1].section).toBe('SKILLS');
+
+    const afterSecondIngest = await repository.findBySlug(saved.slug);
+    expect(afterSecondIngest?.contentHash).toBe('hash-v2');
+  });
 });

@@ -24,6 +24,8 @@ export interface CandidateAttributes {
   readonly sourceChecksum: string;
   readonly createdAt: Date | null;
   readonly ingestedAt: Date | null;
+  /** sha256 of the last-extracted PDF text — lets ingestion skip re-embedding an unchanged CV. */
+  readonly contentHash: string | null;
 }
 
 /**
@@ -76,6 +78,7 @@ export class Candidate {
       sourceChecksum: personaChecksum(input.persona),
       createdAt: null,
       ingestedAt: null,
+      contentHash: null,
     });
   }
 
@@ -121,6 +124,10 @@ export class Candidate {
 
   get ingestedAt(): Date | null {
     return this.attributes.ingestedAt;
+  }
+
+  get contentHash(): string | null {
+    return this.attributes.contentHash;
   }
 
   /** The skills a card shows. Order is the model's — most relevant first. */

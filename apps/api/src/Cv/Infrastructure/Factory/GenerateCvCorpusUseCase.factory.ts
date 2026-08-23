@@ -4,6 +4,10 @@ import {
   APP_CONFIG,
   type AppConfig,
 } from '../../../Shared/Infrastructure/Config';
+import {
+  CorpusIngesterId,
+  type CorpusIngester,
+} from '../../Application/CorpusIngester';
 import { GenerateCvCorpusUseCase } from '../../Application/GenerateCvCorpusUseCase';
 import { CvRepositoryId, type CvRepository } from '../../Domain/CvRepository';
 import { CvStorageId, type CvStorage } from '../../Domain/CvStorage';
@@ -27,6 +31,7 @@ export const GenerateCvCorpusUseCaseFactory: Provider = {
     storage: CvStorage,
     config: AppConfig,
     logger: Logger,
+    ingester: CorpusIngester,
   ): GenerateCvCorpusUseCase =>
     new GenerateCvCorpusUseCase(
       repository,
@@ -42,6 +47,7 @@ export const GenerateCvCorpusUseCaseFactory: Provider = {
           maxBatchDelayMs: config.generation.maxBatchDelayMs,
         },
         logger,
+        ingester,
       },
     ),
   inject: [
@@ -52,5 +58,6 @@ export const GenerateCvCorpusUseCaseFactory: Provider = {
     CvStorageId,
     APP_CONFIG,
     LoggerId,
+    CorpusIngesterId,
   ],
 };

@@ -1,5 +1,5 @@
 import type { ExtractedDocument } from '../../../../src/Cv/Domain/TextExtractor';
-import { chunkCv } from '../../../../src/Cv/Domain/CvChunker';
+import { chunkCv, detectCvLanguage } from '../../../../src/Cv/Domain/CvChunker';
 
 const documentOf = (rawText: string): ExtractedDocument => ({
   pages: [rawText],
@@ -132,5 +132,26 @@ Owned the platform migration end to end.`;
     for (const chunk of summaryChunks) {
       expect(chunk.tokenCount).toBeLessThanOrEqual(400);
     }
+  });
+});
+
+describe('detectCvLanguage', () => {
+  it('picks English when English headings match', () => {
+    const rawText = 'Ana Ruiz\n\nSummary\nSome text.\n\nExperience\nA job.';
+
+    expect(detectCvLanguage(rawText)).toBe('en');
+  });
+
+  it('picks Spanish when Spanish headings match', () => {
+    const rawText =
+      'Ana Ruiz\n\nPerfil\nAlgo de texto.\n\nExperiencia\nUn trabajo.';
+
+    expect(detectCvLanguage(rawText)).toBe('es');
+  });
+
+  it('defaults to English when no heading is recognized', () => {
+    const rawText = 'Just some paragraphs with no headings at all in them.';
+
+    expect(detectCvLanguage(rawText)).toBe('en');
   });
 });

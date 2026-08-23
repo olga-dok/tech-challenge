@@ -19,8 +19,10 @@ export {
 export {
   CorpusStatsSchema,
   GenerateCorpusRequestSchema,
+  IngestCorpusRequestSchema,
   type CorpusStatsDto,
   type GenerateCorpusRequestDto,
+  type IngestCorpusRequestDto,
 } from './corpus';
 export {
   CV_LANGUAGES,
