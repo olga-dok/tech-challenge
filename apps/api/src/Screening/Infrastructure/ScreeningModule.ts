@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { CvModule } from '../../Cv/Infrastructure/CvModule';
 import { HttpModule } from '../../Shared/Infrastructure/Http';
 import { PrismaModule } from '../../Shared/Infrastructure/Prisma';
@@ -23,8 +22,12 @@ import { CvRetrieverFactory } from './Factory/CvRetriever.factory';
     HttpModule,
     PrismaModule,
     CvModule,
-    // Capped at the controller with @Throttle; this default only matters for
-    // routes that don't override it.
+    // A default is required by the module even though every route that
+    // actually uses it overrides it with its own @Throttle — see
+    // AskQuestionAction. Not registered as a global guard: this limit exists
+    // to cap LLM cost on /screening/ask specifically, not ordinary gallery
+    // browsing (candidate list, portraits, PDFs), which would otherwise trip
+    // it on a single page load.
     ThrottlerModule.forRoot({ throttlers: [{ ttl: 60_000, limit: 20 }] }),
   ],
   controllers: [AskQuestionAction],
@@ -32,7 +35,6 @@ import { CvRetrieverFactory } from './Factory/CvRetriever.factory';
     CvRetrieverFactory,
     AnswererFactory,
     AnswerCvQuestionUseCaseFactory,
-    { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],
   exports: [CvRetrieverId, GroundedAnswererId, AnswerCvQuestionUseCase],
 })

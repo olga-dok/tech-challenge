@@ -1,5 +1,5 @@
-import { Body, Controller, Inject, Post, Res } from '@nestjs/common';
-import { Throttle } from '@nestjs/throttler';
+import { Body, Controller, Inject, Post, Res, UseGuards } from '@nestjs/common';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import {
   AskQuestionRequestSchema,
   type AskQuestionRequestDto,
@@ -12,6 +12,11 @@ import { AnswerCvQuestionUseCase } from '../../Application/AnswerCvQuestionUseCa
 import { Question } from '../../Domain/Question';
 
 @Controller('screening')
+// Scoped to this controller, not global: this caps LLM cost on /screening/ask
+// specifically. A global guard would also throttle plain gallery browsing —
+// the candidate list, portraits, and PDFs — which has nothing to do with LLM
+// spend and fires far more than 20 requests/minute on an ordinary page load.
+@UseGuards(ThrottlerGuard)
 export class AskQuestionAction {
   constructor(
     private readonly useCase: AnswerCvQuestionUseCase,

@@ -3,8 +3,7 @@ import {
   type DynamicModule,
   type INestApplication,
 } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { Test } from '@nestjs/testing';
 import type { ScreeningStreamEvent } from '@repo/contracts';
 import { sampleProfile } from '@repo/cv-templates';
@@ -98,7 +97,6 @@ class TestScreeningModule {
           provide: AnswerCvQuestionUseCase,
           useFactory: () => useCaseFor(repository),
         },
-        { provide: APP_GUARD, useClass: ThrottlerGuard },
       ],
     };
   }
