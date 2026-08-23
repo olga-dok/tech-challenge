@@ -13,8 +13,10 @@ export {
 export {
   CandidatePageSchema,
   CandidateSummarySchema,
+  ListCandidatesRequestSchema,
   type CandidatePageDto,
   type CandidateSummaryDto,
+  type ListCandidatesRequestDto,
 } from './candidate';
 export {
   CorpusStatsSchema,

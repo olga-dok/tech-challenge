@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { SenioritySchema } from './enums';
+import { RoleFamilySchema, SenioritySchema } from './enums';
 import { paginatedSchema } from './pagination';
 import { SlugSchema } from './primitives';
 
@@ -26,3 +26,26 @@ export type CandidateSummaryDto = z.infer<typeof CandidateSummarySchema>;
 
 export const CandidatePageSchema = paginatedSchema(CandidateSummarySchema);
 export type CandidatePageDto = z.infer<typeof CandidatePageSchema>;
+
+export const ListCandidatesRequestSchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(50).default(12),
+  roleFamily: RoleFamilySchema.optional(),
+  seniority: SenioritySchema.optional(),
+  skill: z.string().min(1).optional(),
+  /**
+   * Comma-separated so it survives as a single query param; order is
+   * preserved end to end, since this is how the chat ranking will drive the
+   * gallery without the frontend holding the whole corpus in memory.
+   */
+  slugs: z
+    .string()
+    .optional()
+    .transform((value) =>
+      value === undefined ? undefined : value.split(',').filter(Boolean),
+    )
+    .pipe(z.array(SlugSchema).optional()),
+});
+export type ListCandidatesRequestDto = z.infer<
+  typeof ListCandidatesRequestSchema
+>;

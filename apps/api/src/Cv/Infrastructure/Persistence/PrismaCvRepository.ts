@@ -8,7 +8,11 @@ import type {
 import type { PrismaConnection } from '../../../Shared/Infrastructure/Prisma';
 import { Candidate } from '../../Domain/Candidate';
 import type { EmbeddedCvChunk } from '../../Domain/CvChunk';
-import type { CvRepository } from '../../Domain/CvRepository';
+import type {
+  CandidatePageCriteria,
+  CorpusStats,
+  CvRepository,
+} from '../../Domain/CvRepository';
 import { Slug } from '../../Domain/Slug';
 
 interface CandidateRow {
@@ -144,6 +148,50 @@ export class PrismaCvRepository implements CvRepository {
         data: { contentHash, ingestedAt: new Date() },
       }),
     ]);
+  }
+
+  async findPage(
+    criteria: CandidatePageCriteria,
+  ): Promise<{ items: Candidate[]; total: number }> {
+    const where: Prisma.CandidateWhereInput = {
+      ...(criteria.roleFamily !== undefined && {
+        roleFamily: criteria.roleFamily,
+      }),
+      ...(criteria.seniority !== undefined && {
+        seniority: criteria.seniority,
+      }),
+      ...(criteria.skill !== undefined && { skills: { has: criteria.skill } }),
+    };
+
+    const [rows, total] = await Promise.all([
+      this.prisma.candidate.findMany({
+        where,
+        skip: (criteria.page - 1) * criteria.pageSize,
+        take: criteria.pageSize,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.candidate.count({ where }),
+    ]);
+
+    return { items: rows.map((row) => this.buildCandidate(row)), total };
+  }
+
+  async findBySlugs(slugs: readonly Slug[]): Promise<Candidate[]> {
+    const rows = await this.prisma.candidate.findMany({
+      where: { slug: { in: slugs.map((slug) => slug.value) } },
+    });
+
+    return rows.map((row) => this.buildCandidate(row));
+  }
+
+  async corpusStats(): Promise<CorpusStats> {
+    const [candidates, chunks, aggregate] = await Promise.all([
+      this.prisma.candidate.count(),
+      this.prisma.cvChunk.count(),
+      this.prisma.candidate.aggregate({ _max: { ingestedAt: true } }),
+    ]);
+
+    return { candidates, chunks, lastIngestedAt: aggregate._max.ingestedAt };
   }
 
   /**

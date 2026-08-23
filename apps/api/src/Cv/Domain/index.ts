@@ -4,15 +4,21 @@ export {
   type CandidateFiles,
   type PersonaFacts,
 } from './Candidate';
+export { CandidateNotFoundError } from './CandidateNotFoundError';
 export { CorpusPlan, MAX_CORPUS_SIZE } from './CorpusPlan';
 export {
   intoBatches,
   nextBatchDelay,
   type BatchPacing,
 } from './corpusBatching';
-export { chunkCv } from './CvChunker';
-export { type CvChunk } from './CvChunk';
-export { CvRepositoryId, type CvRepository } from './CvRepository';
+export { chunkCv, detectCvLanguage } from './CvChunker';
+export { type CvChunk, type EmbeddedCvChunk } from './CvChunk';
+export {
+  CvRepositoryId,
+  type CandidatePageCriteria,
+  type CorpusStats,
+  type CvRepository,
+} from './CvRepository';
 export { CvStorageId, type CvStorage, type StoredCvFiles } from './CvStorage';
 export { templateIdFor } from './CvTemplate';
 export { EmbedderId, type Embedder } from './Embedder';

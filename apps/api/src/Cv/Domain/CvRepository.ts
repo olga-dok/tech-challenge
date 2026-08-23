@@ -1,6 +1,21 @@
+import type { RoleFamily, Seniority } from '@repo/contracts';
 import type { Candidate } from './Candidate';
 import type { EmbeddedCvChunk } from './CvChunk';
 import type { Slug } from './Slug';
+
+export interface CandidatePageCriteria {
+  readonly page: number;
+  readonly pageSize: number;
+  readonly roleFamily?: RoleFamily;
+  readonly seniority?: Seniority;
+  readonly skill?: string;
+}
+
+export interface CorpusStats {
+  readonly candidates: number;
+  readonly chunks: number;
+  readonly lastIngestedAt: Date | null;
+}
 
 /**
  * Persistence for generated candidates, in terms the domain cares about.
@@ -32,6 +47,16 @@ export interface CvRepository {
     contentHash: string,
     chunks: readonly EmbeddedCvChunk[],
   ): Promise<void>;
+  /** A filtered, paginated slice of the corpus, for the gallery to browse. */
+  findPage(
+    criteria: CandidatePageCriteria,
+  ): Promise<{ items: Candidate[]; total: number }>;
+  /**
+   * Set membership only — ordering an arbitrary input list of slugs is a
+   * presentation concern the caller owns, not something persistence should do.
+   */
+  findBySlugs(slugs: readonly Slug[]): Promise<Candidate[]>;
+  corpusStats(): Promise<CorpusStats>;
 }
 
 export const CvRepositoryId = Symbol('CvRepository');

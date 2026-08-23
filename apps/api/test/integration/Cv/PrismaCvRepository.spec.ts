@@ -8,7 +8,13 @@ import {
   loadConfigFromEnvironment,
   type AppConfig,
 } from '../../../src/Shared/Infrastructure/Config';
+import type { RoleFamily, Seniority } from '@repo/contracts';
 import { sampleProfile } from '@repo/cv-templates';
+
+// Unlikely to collide with any real candidate's skills, so pagination/filter
+// tests can scope to exactly the rows they create even against a real,
+// already-populated corpus.
+const MARKER_SKILL = 'ZzzIntegrationTestSkill';
 
 /**
  * Against a real Postgres, because what is worth checking here is the SQL: the
@@ -38,6 +44,28 @@ describe('PrismaCvRepository', () => {
       profile: { ...sampleProfile(), fullName: persona.fullName },
       files: { pdfPath: 'cvs/x.pdf', portraitPath: 'portraits/x.jpg' },
       templateId: 'sidebar',
+    });
+
+  const candidateWithFacts = (
+    slugSuffix: string,
+    facts: { roleFamily: RoleFamily; seniority: Seniority },
+  ): Candidate =>
+    Candidate.fromAttributes({
+      id: null,
+      slug: Slug.from(`it-page-${slugSuffix}`),
+      profile: { ...sampleProfile(), skills: [MARKER_SKILL] },
+      persona: {
+        country: 'Spain',
+        roleFamily: facts.roleFamily,
+        seniority: facts.seniority,
+        yearsExperience: 5,
+      },
+      files: { pdfPath: 'cvs/x.pdf', portraitPath: 'portraits/x.jpg' },
+      templateId: 'classic',
+      sourceChecksum: `checksum-it-page-${slugSuffix}`,
+      createdAt: null,
+      ingestedAt: null,
+      contentHash: null,
     });
 
   beforeAll(async () => {
@@ -195,5 +223,107 @@ describe('PrismaCvRepository', () => {
 
     const afterSecondIngest = await repository.findBySlug(saved.slug);
     expect(afterSecondIngest?.contentHash).toBe('hash-v2');
+  });
+
+  it('paginates a filtered slice of the corpus, including a partial last page', async () => {
+    for (let index = 0; index < 5; index += 1) {
+      await repository.save(
+        candidateWithFacts(`p${String(index)}`, {
+          roleFamily: 'BACKEND',
+          seniority: 'SENIOR',
+        }),
+      );
+    }
+
+    const firstPage = await repository.findPage({
+      page: 1,
+      pageSize: 2,
+      skill: MARKER_SKILL,
+    });
+    expect(firstPage.total).toBe(5);
+    expect(firstPage.items).toHaveLength(2);
+
+    const lastPage = await repository.findPage({
+      page: 3,
+      pageSize: 2,
+      skill: MARKER_SKILL,
+    });
+    expect(lastPage.items).toHaveLength(1);
+  });
+
+  it('filters findPage by roleFamily and seniority', async () => {
+    await repository.save(
+      candidateWithFacts('backend', {
+        roleFamily: 'BACKEND',
+        seniority: 'SENIOR',
+      }),
+    );
+    await repository.save(
+      candidateWithFacts('frontend', {
+        roleFamily: 'FRONTEND',
+        seniority: 'JUNIOR',
+      }),
+    );
+
+    const backendOnly = await repository.findPage({
+      page: 1,
+      pageSize: 10,
+      skill: MARKER_SKILL,
+      roleFamily: 'BACKEND',
+    });
+    expect(backendOnly.items.map((candidate) => candidate.slug.value)).toEqual([
+      'it-page-backend',
+    ]);
+
+    const seniorOnly = await repository.findPage({
+      page: 1,
+      pageSize: 10,
+      skill: MARKER_SKILL,
+      seniority: 'SENIOR',
+    });
+    expect(seniorOnly.items.map((candidate) => candidate.slug.value)).toEqual([
+      'it-page-backend',
+    ]);
+  });
+
+  it('findBySlugs returns exactly the matching set', async () => {
+    const saved = await repository.save(candidateFor(personaA));
+
+    const found = await repository.findBySlugs([
+      saved.slug,
+      Slug.from('it-nonexistent-candidate'),
+    ]);
+
+    expect(found.map((candidate) => candidate.slug.value)).toEqual([
+      saved.slug.value,
+    ]);
+  });
+
+  it('corpusStats reflects real counts', async () => {
+    const before = await repository.corpusStats();
+
+    const saved = await repository.save(candidateFor(personaA));
+    await repository.replaceChunks(saved.id as string, 'hash-stats', [
+      {
+        section: 'SUMMARY',
+        ordinal: 0,
+        content: 'x',
+        tokenCount: 1,
+        embedding: Array.from({ length: 384 }, () => 0.1),
+      },
+      {
+        section: 'SKILLS',
+        ordinal: 1,
+        content: 'y',
+        tokenCount: 1,
+        embedding: Array.from({ length: 384 }, () => 0.1),
+      },
+    ]);
+
+    const after = await repository.corpusStats();
+
+    expect(after.candidates).toBe(before.candidates + 1);
+    expect(after.chunks).toBe(before.chunks + 2);
+    expect(after.lastIngestedAt).not.toBeNull();
   });
 });

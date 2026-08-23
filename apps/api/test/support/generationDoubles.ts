@@ -104,6 +104,7 @@ export const repositoryStub = (): RepositoryStub => {
   const bySlug = new Map<string, Candidate>();
   const byChecksum = new Map<string, Candidate>();
   const byId = new Map<string, Candidate>();
+  const chunkCountByCandidateId = new Map<string, number>();
   const saved: Candidate[] = [];
   const replaceChunksCalls: ReplaceChunksCall[] = [];
 
@@ -151,6 +152,7 @@ export const repositoryStub = (): RepositoryStub => {
     findAll: () => Promise.resolve([...byId.values()]),
     replaceChunks: (candidateId, contentHash, chunks) => {
       replaceChunksCalls.push({ candidateId, contentHash, chunks });
+      chunkCountByCandidateId.set(candidateId, chunks.length);
 
       const existing = byId.get(candidateId);
       if (existing) {
@@ -171,6 +173,47 @@ export const repositoryStub = (): RepositoryStub => {
       }
 
       return Promise.resolve();
+    },
+    findPage: (criteria) => {
+      const matches = [...byId.values()].filter(
+        (candidate) =>
+          (criteria.roleFamily === undefined ||
+            candidate.persona.roleFamily === criteria.roleFamily) &&
+          (criteria.seniority === undefined ||
+            candidate.persona.seniority === criteria.seniority) &&
+          (criteria.skill === undefined ||
+            candidate.mentionsSkill(criteria.skill)),
+      );
+      const start = (criteria.page - 1) * criteria.pageSize;
+
+      return Promise.resolve({
+        items: matches.slice(start, start + criteria.pageSize),
+        total: matches.length,
+      });
+    },
+    findBySlugs: (slugs) => {
+      const wanted = new Set(slugs.map((slug) => slug.value));
+
+      return Promise.resolve(
+        [...byId.values()].filter((candidate) =>
+          wanted.has(candidate.slug.value),
+        ),
+      );
+    },
+    corpusStats: () => {
+      const chunks = [...chunkCountByCandidateId.values()].reduce(
+        (sum, count) => sum + count,
+        0,
+      );
+      const ingestedDates = [...byId.values()]
+        .map((candidate) => candidate.ingestedAt)
+        .filter((date): date is Date => date !== null);
+      const lastIngestedAt =
+        ingestedDates.length === 0
+          ? null
+          : new Date(Math.max(...ingestedDates.map((date) => date.getTime())));
+
+      return Promise.resolve({ candidates: byId.size, chunks, lastIngestedAt });
     },
   };
 };
