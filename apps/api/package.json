@@ -21,11 +21,11 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:integration": "jest --config ./test/jest-integration.json"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
+    "test:cov": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
+    "test:debug": "node --inspect-brk --experimental-vm-modules -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "test:integration": "NODE_OPTIONS=--experimental-vm-modules jest --config ./test/jest-integration.json"
   },
   "dependencies": {
     "@huggingface/transformers": "^4.2.0",
@@ -36,6 +36,7 @@
     "@repo/contracts": "workspace:*",
     "@repo/cv-templates": "workspace:*",
     "dotenv": "^17.4.2",
+    "pdf-parse": "^2.4.5",
     "puppeteer": "^25.8.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
@@ -59,7 +60,6 @@
     "eslint-plugin-prettier": "^5.2.2",
     "globals": "^17.0.0",
     "jest": "^30.0.0",
-    "pdf-parse": "^2.4.5",
     "prettier": "^3.4.2",
     "prisma": "^6.19.2",
     "source-map-support": "^0.5.21",

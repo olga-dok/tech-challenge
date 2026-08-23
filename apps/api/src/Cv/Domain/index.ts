@@ -10,6 +10,8 @@ export {
   nextBatchDelay,
   type BatchPacing,
 } from './corpusBatching';
+export { chunkCv } from './CvChunker';
+export { type CvChunk } from './CvChunk';
 export { CvRepositoryId, type CvRepository } from './CvRepository';
 export { CvStorageId, type CvStorage, type StoredCvFiles } from './CvStorage';
 export { templateIdFor } from './CvTemplate';
@@ -44,6 +46,14 @@ export {
 export { PortraitPaintingError } from './PortraitPaintingError';
 export { ProfileDrafterId, type ProfileDrafter } from './ProfileDrafter';
 export { ProfileDraftingError } from './ProfileDraftingError';
+export {
+  TextExtractorId,
+  type ExtractedDocument,
+  type TextExtractionFailure,
+  type TextExtractionFailureReason,
+  type TextExtractionResult,
+  type TextExtractor,
+} from './TextExtractor';
 export {
   PLANTED_CASE_INDEXES,
   PLANTED_GIVEN_NAME,

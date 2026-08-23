@@ -9,6 +9,7 @@ import { EmbedderId } from '../Domain/Embedder';
 import { PdfRendererId } from '../Domain/PdfRenderer';
 import { PortraitPainterId } from '../Domain/PortraitPainter';
 import { ProfileDrafterId } from '../Domain/ProfileDrafter';
+import { TextExtractorId } from '../Domain/TextExtractor';
 import { GenerateCvCorpusAction } from './Action/GenerateCvCorpusAction';
 import { CorpusRunLockFactory } from './Factory/CorpusRunLock.factory';
 import { CvRepositoryFactory } from './Factory/CvRepository.factory';
@@ -18,6 +19,7 @@ import { GenerateCvCorpusUseCaseFactory } from './Factory/GenerateCvCorpusUseCas
 import { PdfRendererFactory } from './Factory/PdfRenderer.factory';
 import { PortraitPainterFactory } from './Factory/PortraitPainter.factory';
 import { ProfileDrafterFactory } from './Factory/ProfileDrafter.factory';
+import { TextExtractorFactory } from './Factory/TextExtractor.factory';
 
 /** The CV context: generation today, ingestion and the read API as they land. */
 @Module({
@@ -28,6 +30,7 @@ import { ProfileDrafterFactory } from './Factory/ProfileDrafter.factory';
     EmbedderFactory,
     PortraitPainterFactory,
     PdfRendererFactory,
+    TextExtractorFactory,
     CvRepositoryFactory,
     CvStorageFactory,
     CorpusRunLockFactory,
@@ -38,6 +41,7 @@ import { ProfileDrafterFactory } from './Factory/ProfileDrafter.factory';
     EmbedderId,
     PortraitPainterId,
     PdfRendererId,
+    TextExtractorId,
     CvRepositoryId,
     CvStorageId,
     GenerateCvCorpusUseCase,
