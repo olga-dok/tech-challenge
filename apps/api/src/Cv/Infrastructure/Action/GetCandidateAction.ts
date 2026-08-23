@@ -1,8 +1,7 @@
-import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { SlugSchema, type CandidateProfile } from '@repo/contracts';
 import { ZodValidationPipe } from '../../../Shared/Infrastructure/Validation';
 import { GetCandidateUseCase } from '../../Application/GetCandidateUseCase';
-import { CandidateNotFoundError } from '../../Domain/CandidateNotFoundError';
 import { Slug } from '../../Domain/Slug';
 
 @Controller('cvs')
@@ -12,22 +11,16 @@ export class GetCandidateAction {
   /**
    * The full profile, not the gallery summary — portrait/PDF URLs are a
    * deterministic function of the slug the caller already has, so there is
-   * nothing else worth adding to the response.
+   * nothing else worth adding to the response. An unknown slug's
+   * `CandidateNotFoundError` is an `HttpError`, reaching the client as a 404
+   * via the global `ProblemDetailsFilter`.
    */
   @Get(':slug')
   async handle(
     @Param('slug', new ZodValidationPipe(SlugSchema)) slugValue: string,
   ): Promise<CandidateProfile> {
-    try {
-      const candidate = await this.useCase.execute(Slug.from(slugValue));
+    const candidate = await this.useCase.execute(Slug.from(slugValue));
 
-      return candidate.profile;
-    } catch (error: unknown) {
-      if (error instanceof CandidateNotFoundError) {
-        throw new NotFoundException(error.message);
-      }
-
-      throw error;
-    }
+    return candidate.profile;
   }
 }

@@ -1,0 +1,7 @@
+import { HttpError } from './HttpError';
+
+export abstract class ConflictError extends HttpError {
+  protected constructor(message: string) {
+    super(message, 409);
+  }
+}

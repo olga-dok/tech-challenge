@@ -17,7 +17,6 @@ import {
 } from '../../../Shared/Infrastructure/Config';
 import { ZodValidationPipe } from '../../../Shared/Infrastructure/Validation';
 import { GetCandidateUseCase } from '../../Application/GetCandidateUseCase';
-import { CandidateNotFoundError } from '../../Domain/CandidateNotFoundError';
 import { Slug } from '../../Domain/Slug';
 
 // The reverse of FileSystemCvStorage's extension map: one is written at
@@ -51,14 +50,16 @@ export class GetCandidatePortraitAction {
     @Param('slug', new ZodValidationPipe(SlugSchema)) slugValue: string,
     @Res() response: Response,
   ): Promise<void> {
-    let path: string;
+    // CandidateNotFoundError is an HttpError and propagates straight to the
+    // global ProblemDetailsFilter as a 404 — only the ENOENT case (a file
+    // missing on disk despite a DB row) needs a manual catch here.
+    const candidate = await this.useCase.execute(Slug.from(slugValue));
+    const path = join(this.config.storageDir, candidate.files.portraitPath);
 
     try {
-      const candidate = await this.useCase.execute(Slug.from(slugValue));
-      path = join(this.config.storageDir, candidate.files.portraitPath);
       await stat(path);
     } catch (error: unknown) {
-      if (error instanceof CandidateNotFoundError || isFileNotFound(error)) {
+      if (isFileNotFound(error)) {
         throw new NotFoundException('No portrait found for that candidate');
       }
 

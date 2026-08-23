@@ -4,6 +4,7 @@ import {
   InvalidConfigurationError,
   loadConfigFromEnvironment,
 } from './Shared/Infrastructure/Config';
+import { ProblemDetailsFilter } from './Shared/Infrastructure/ExceptionHandling';
 
 async function bootstrap(): Promise<void> {
   // Order matters: the environment is loaded and validated before the Nest
@@ -12,6 +13,7 @@ async function bootstrap(): Promise<void> {
   const config = loadConfigFromEnvironment();
 
   const app = await NestFactory.create(AppModule.forConfig(config));
+  app.useGlobalFilters(new ProblemDetailsFilter());
   await app.listen(config.port);
 }
 

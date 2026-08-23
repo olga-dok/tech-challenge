@@ -1,6 +1,6 @@
-import { BaseError } from '../../Shared/Domain';
+import { ConflictError } from '../../Shared/Domain';
 
-export class CorpusAlreadyGeneratingError extends BaseError {
+export class CorpusAlreadyGeneratingError extends ConflictError {
   private constructor(message: string) {
     super(message);
   }

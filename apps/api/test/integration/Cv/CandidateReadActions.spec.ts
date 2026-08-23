@@ -25,6 +25,7 @@ import { GetCandidatePdfAction } from '../../../src/Cv/Infrastructure/Action/Get
 import { GetCandidatePortraitAction } from '../../../src/Cv/Infrastructure/Action/GetCandidatePortraitAction';
 import { GetCorpusStatsAction } from '../../../src/Cv/Infrastructure/Action/GetCorpusStatsAction';
 import { ListCandidatesAction } from '../../../src/Cv/Infrastructure/Action/ListCandidatesAction';
+import { ProblemDetailsFilter } from '../../../src/Shared/Infrastructure/ExceptionHandling';
 import {
   ConfigModule,
   loadAppConfig,
@@ -128,6 +129,7 @@ describe('candidate read API', () => {
     }).compile();
 
     app = moduleRef.createNestApplication();
+    app.useGlobalFilters(new ProblemDetailsFilter());
     await app.init();
   });
 

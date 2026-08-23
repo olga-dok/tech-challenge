@@ -1,11 +1,4 @@
-import {
-  Body,
-  ConflictException,
-  Controller,
-  Inject,
-  Post,
-  Res,
-} from '@nestjs/common';
+import { Body, Controller, Inject, Post, Res } from '@nestjs/common';
 import {
   IngestCorpusRequestSchema,
   type IngestCorpusRequestDto,
@@ -15,10 +8,7 @@ import { finalize } from 'rxjs';
 import { LoggerId, type Logger } from '../../../Shared/Domain';
 import { pipeEventStream } from '../../../Shared/Infrastructure/Sse';
 import { ZodValidationPipe } from '../../../Shared/Infrastructure/Validation';
-import {
-  CorpusAlreadyGeneratingError,
-  CorpusRunLock,
-} from '../../Application/CorpusRunLock';
+import { CorpusRunLock } from '../../Application/CorpusRunLock';
 import { IngestCvCorpusUseCase } from '../../Application/IngestCvCorpusUseCase';
 
 @Controller('cvs')
@@ -43,15 +33,7 @@ export class IngestCvCorpusAction {
     body: IngestCorpusRequestDto,
     @Res() response: Response,
   ): void {
-    try {
-      this.lock.acquire();
-    } catch (error: unknown) {
-      if (error instanceof CorpusAlreadyGeneratingError) {
-        throw new ConflictException(error.message);
-      }
-
-      throw error;
-    }
+    this.lock.acquire();
 
     this.logger.info('Corpus ingestion requested', { force: body.force });
 

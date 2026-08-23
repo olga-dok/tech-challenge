@@ -67,6 +67,26 @@ export class HttpTransport {
     };
   }
 
+  /**
+   * The raw body stream, for a provider's own streaming endpoint. Reuses
+   * `send()` as-is — the retryable connect-and-status-check applies the same
+   * way; what happens to a stream that fails *mid*-stream is the caller's
+   * concern, since by then bytes may already have reached the client.
+   */
+  async stream(request: HttpRequest): Promise<ReadableStream<Uint8Array>> {
+    const response = await this.send(request);
+
+    if (!response.body) {
+      throw HttpRequestFailedError.fromResponse(
+        request.url,
+        response.status,
+        'response had no body to stream',
+      );
+    }
+
+    return response.body;
+  }
+
   private send(request: HttpRequest): Promise<Response> {
     const retry = { ...this.defaults, ...request.retry };
 

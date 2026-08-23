@@ -1,11 +1,4 @@
-import {
-  Body,
-  ConflictException,
-  Controller,
-  Inject,
-  Post,
-  Res,
-} from '@nestjs/common';
+import { Body, Controller, Inject, Post, Res } from '@nestjs/common';
 import {
   GenerateCorpusRequestSchema,
   type GenerateCorpusRequestDto,
@@ -19,10 +12,7 @@ import {
 } from '../../../Shared/Infrastructure/Config';
 import { pipeEventStream } from '../../../Shared/Infrastructure/Sse';
 import { ZodValidationPipe } from '../../../Shared/Infrastructure/Validation';
-import {
-  CorpusAlreadyGeneratingError,
-  CorpusRunLock,
-} from '../../Application/CorpusRunLock';
+import { CorpusRunLock } from '../../Application/CorpusRunLock';
 import { GenerateCvCorpusUseCase } from '../../Application/GenerateCvCorpusUseCase';
 
 @Controller('cvs')
@@ -40,7 +30,9 @@ export class GenerateCvCorpusAction {
    * answer to a button press.
    *
    * A second POST while a run is active is rejected before the stream opens, so
-   * a double-clicked button cannot double the corpus.
+   * a double-clicked button cannot double the corpus. `CorpusAlreadyGeneratingError`
+   * is an `HttpError`, so an active lock reaches the client as a 409 via the
+   * global `ProblemDetailsFilter` with no mapping needed here.
    */
   @Post('generate')
   handle(
@@ -48,19 +40,7 @@ export class GenerateCvCorpusAction {
     body: GenerateCorpusRequestDto,
     @Res() response: Response,
   ): void {
-    try {
-      this.lock.acquire();
-    } catch (error: unknown) {
-      // Mapped here rather than thrown as an HTTP error by the lock: the
-      // Application layer states the rule, and Infrastructure decides what that
-      // means over HTTP. A 409 with a readable message beats doubling the
-      // corpus because someone double-clicked.
-      if (error instanceof CorpusAlreadyGeneratingError) {
-        throw new ConflictException(error.message);
-      }
-
-      throw error;
-    }
+    this.lock.acquire();
 
     const seed = body.seed ?? this.config.generation.seed;
 

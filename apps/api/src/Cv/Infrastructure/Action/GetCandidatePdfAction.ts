@@ -17,7 +17,6 @@ import {
 } from '../../../Shared/Infrastructure/Config';
 import { ZodValidationPipe } from '../../../Shared/Infrastructure/Validation';
 import { GetCandidateUseCase } from '../../Application/GetCandidateUseCase';
-import { CandidateNotFoundError } from '../../Domain/CandidateNotFoundError';
 import { Slug } from '../../Domain/Slug';
 
 // Duck-typed on `.code` rather than `instanceof Error`: Node's own advice for
@@ -40,14 +39,13 @@ export class GetCandidatePdfAction {
     @Param('slug', new ZodValidationPipe(SlugSchema)) slugValue: string,
     @Res() response: Response,
   ): Promise<void> {
-    let path: string;
+    const candidate = await this.useCase.execute(Slug.from(slugValue));
+    const path = join(this.config.storageDir, candidate.files.pdfPath);
 
     try {
-      const candidate = await this.useCase.execute(Slug.from(slugValue));
-      path = join(this.config.storageDir, candidate.files.pdfPath);
       await stat(path);
     } catch (error: unknown) {
-      if (error instanceof CandidateNotFoundError || isFileNotFound(error)) {
+      if (isFileNotFound(error)) {
         throw new NotFoundException('No PDF found for that candidate');
       }
 

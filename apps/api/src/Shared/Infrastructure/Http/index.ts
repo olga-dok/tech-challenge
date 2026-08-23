@@ -7,5 +7,6 @@ export {
   type HttpRequest,
 } from './HttpTransport';
 export { HttpTransportFactory } from './Factory/HttpTransport.factory';
+export { readSseLines } from './readSseLines';
 export { RetryableError } from './RetryableError';
 export { parseRetryAfter, withRetry, type RetryOptions } from './withRetry';

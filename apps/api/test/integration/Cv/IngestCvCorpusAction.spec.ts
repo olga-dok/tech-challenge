@@ -16,6 +16,7 @@ import type { Embedder } from '../../../src/Cv/Domain/Embedder';
 import { Slug } from '../../../src/Cv/Domain/Slug';
 import type { TextExtractor } from '../../../src/Cv/Domain/TextExtractor';
 import { IngestCvCorpusAction } from '../../../src/Cv/Infrastructure/Action/IngestCvCorpusAction';
+import { ProblemDetailsFilter } from '../../../src/Shared/Infrastructure/ExceptionHandling';
 import { LoggerModule } from '../../../src/Shared/Infrastructure/Logging';
 import {
   ConfigModule,
@@ -132,6 +133,7 @@ describe('POST /cvs/ingest', () => {
     }).compile();
 
     app = moduleRef.createNestApplication();
+    app.useGlobalFilters(new ProblemDetailsFilter());
     await app.init();
   });
 
@@ -157,10 +159,12 @@ describe('POST /cvs/ingest', () => {
     const lock = app.get(CorpusRunLock);
     lock.acquire();
 
-    const response = await post({}).expect(409);
+    const response = await post({})
+      .expect(409)
+      .expect('content-type', /application\/problem\+json/);
 
-    const conflict = response.body as { statusCode: number; message: string };
-    expect(conflict.message).toContain('already in progress');
+    const conflict = response.body as { status: number; detail: string };
+    expect(conflict.detail).toContain('already in progress');
   });
 
   it('releases the lock when a run finishes', async () => {

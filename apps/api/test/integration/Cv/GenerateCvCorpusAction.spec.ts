@@ -10,6 +10,7 @@ import request from 'supertest';
 import { CorpusRunLock } from '../../../src/Cv/Application/CorpusRunLock';
 import { GenerateCvCorpusUseCase } from '../../../src/Cv/Application/GenerateCvCorpusUseCase';
 import { GenerateCvCorpusAction } from '../../../src/Cv/Infrastructure/Action/GenerateCvCorpusAction';
+import { ProblemDetailsFilter } from '../../../src/Shared/Infrastructure/ExceptionHandling';
 import { LoggerModule } from '../../../src/Shared/Infrastructure/Logging';
 import {
   ConfigModule,
@@ -87,6 +88,7 @@ describe('POST /cvs/generate', () => {
     }).compile();
 
     app = moduleRef.createNestApplication();
+    app.useGlobalFilters(new ProblemDetailsFilter());
     await app.init();
   });
 
@@ -136,10 +138,12 @@ describe('POST /cvs/generate', () => {
     const lock = app.get(CorpusRunLock);
     lock.acquire();
 
-    const response = await post({ size: 1 }).expect(409);
+    const response = await post({ size: 1 })
+      .expect(409)
+      .expect('content-type', /application\/problem\+json/);
 
-    const conflict = response.body as { statusCode: number; message: string };
-    expect(conflict.message).toContain('already in progress');
+    const conflict = response.body as { status: number; detail: string };
+    expect(conflict.detail).toContain('already in progress');
   });
 
   it('releases the lock when a run finishes, so the next click works', async () => {
