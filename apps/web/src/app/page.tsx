@@ -5,7 +5,7 @@ import { CorpusView } from "../components/corpus-view";
 export const metadata: Metadata = {
   title: "CV Screener",
   description:
-    "Generate a corpus of CVs, browse the candidates, and ask questions the gallery answers back.",
+    "Search and screen candidates with AI-powered answers grounded in their CVs.",
 };
 
 export default function Home() {
@@ -14,8 +14,8 @@ export default function Home() {
       <header className="flex flex-col gap-1">
         <h1 className="text-3xl font-semibold tracking-tight">CV Screener</h1>
         <p className="max-w-2xl text-base text-zinc-600 dark:text-zinc-400">
-          Generate a corpus of CVs, browse the candidates, and ask questions the
-          gallery answers back.
+          Search and screen candidates with AI-powered answers grounded in their
+          CVs.
         </p>
       </header>
 

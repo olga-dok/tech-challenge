@@ -8,9 +8,8 @@ export interface ListCandidatesRequest {
   readonly seniority?: Seniority;
   readonly skill?: string;
   /**
-   * When set, returns exactly these candidates in this order and ignores
-   * pagination/filters entirely — this is how a chat ranking will drive the
-   * gallery without the frontend holding the whole corpus in memory.
+   * When set, returns these candidates in this order, while still applying
+   * page/pageSize over that ordered subset.
    */
   readonly slugs?: readonly Slug[];
 }

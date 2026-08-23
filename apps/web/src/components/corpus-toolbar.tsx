@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@repo/ui";
 import type { GenerationState } from "./generation-state";
+import { UI_LABELS, type UiLanguage } from "./ui-language";
 
 /**
  * Ticks down to zero over `delayMs`, restarting whenever a new `delayMs`
@@ -41,25 +42,24 @@ function useCountdownSeconds(delayMs: number | null): number {
  * run that didn't finish everything.
  */
 export function CorpusToolbar({
+  language,
   isIngested,
   state,
   onGenerate,
 }: {
+  language: UiLanguage;
   isIngested: boolean;
   state: GenerationState;
   onGenerate: (options: { force?: boolean }) => void;
 }) {
+  const labels = UI_LABELS[language];
   const countdownSeconds = useCountdownSeconds(
     state.status === "throttled" ? state.throttleDelayMs : null,
   );
   const isRunning = state.status !== "idle";
 
   const handleRegenerate = (): void => {
-    if (
-      window.confirm(
-        "Regenerating replaces the existing corpus and takes a few minutes. Continue?",
-      )
-    ) {
+    if (window.confirm(labels.regenerateConfirm)) {
       onGenerate({ force: true });
     }
   };
@@ -77,7 +77,7 @@ export function CorpusToolbar({
           onClick={handleRegenerate}
           disabled={isRunning}
         >
-          Regenerate
+          {labels.regenerateCorpus}
         </Button>
       ) : (
         <Button
@@ -87,7 +87,7 @@ export function CorpusToolbar({
           }}
           disabled={isRunning}
         >
-          Generate corpus
+          {labels.generateCorpus}
         </Button>
       )}
 
@@ -98,7 +98,7 @@ export function CorpusToolbar({
             onGenerate({});
           }}
         >
-          Generate remaining {remaining}
+          {labels.generateRemaining(remaining)}
         </Button>
       ) : null}
 
@@ -108,11 +108,11 @@ export function CorpusToolbar({
         className="text-sm text-zinc-600 dark:text-zinc-400"
       >
         {state.status === "throttled"
-          ? `waiting out a rate limit — resuming in ${String(countdownSeconds)}s`
+          ? labels.waitingRateLimit(countdownSeconds)
           : state.status === "running" && state.total !== null
-            ? `${String(state.completed)} of ${String(state.total)}${
+            ? `${labels.generationProgress(state.completed, state.total)}${
                 state.currentBatch !== null && state.totalBatches !== null
-                  ? ` · batch ${String(state.currentBatch)} of ${String(state.totalBatches)}`
+                  ? ` · ${labels.batchProgress(state.currentBatch, state.totalBatches)}`
                   : ""
               }`
             : null}

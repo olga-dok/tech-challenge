@@ -17,20 +17,20 @@ const candidate: CandidateSummary = {
 
 describe("CandidateCard", () => {
   it("renders the candidate's summary fields", () => {
-    render(<CandidateCard candidate={candidate} />);
+    render(<CandidateCard candidate={candidate} language="en" />);
 
     expect(screen.getByText("Ana Ruiz")).toBeInTheDocument();
     expect(screen.getByText("Senior Backend Engineer")).toBeInTheDocument();
     expect(screen.getByText(/Madrid, Spain/)).toBeInTheDocument();
-    expect(screen.getByText(/8 yrs/)).toBeInTheDocument();
-    // Only the top 3, even though the fixture has 4.
+    expect(screen.getByText(/8 years of experience/)).toBeInTheDocument();
+    // Compact list cards show up to top 4 skills.
     expect(screen.getByText("Kubernetes")).toBeInTheDocument();
     expect(screen.getByText("PostgreSQL")).toBeInTheDocument();
-    expect(screen.queryByText("Redis")).not.toBeInTheDocument();
+    expect(screen.getByText("Redis")).toBeInTheDocument();
   });
 
   it("links to the PDF via the proxy path", () => {
-    render(<CandidateCard candidate={candidate} />);
+    render(<CandidateCard candidate={candidate} language="en" />);
 
     expect(screen.getByRole("link")).toHaveAttribute(
       "href",
@@ -39,7 +39,9 @@ describe("CandidateCard", () => {
   });
 
   it("falls back to initials when the portrait image fails to load", () => {
-    const { container } = render(<CandidateCard candidate={candidate} />);
+    const { container } = render(
+      <CandidateCard candidate={candidate} language="en" />,
+    );
 
     // The portrait is decorative (empty alt), so it has no accessible "img"
     // role — queried by tag instead.
@@ -49,5 +51,23 @@ describe("CandidateCard", () => {
 
     expect(screen.getByText("AR")).toBeInTheDocument();
     expect(container.querySelector("img")).toBeNull();
+  });
+
+  it("shows rank without exposing raw score and provides score tooltip", () => {
+    render(
+      <CandidateCard
+        candidate={candidate}
+        language="en"
+        rank={{
+          rank: 1,
+          score: 0.42,
+          reason: "Strongest match in Experience",
+          slug: "ana-ruiz",
+        }}
+      />,
+    );
+
+    expect(screen.getByText("#1")).toBeInTheDocument();
+    expect(screen.queryByText("0.42")).not.toBeInTheDocument();
   });
 });

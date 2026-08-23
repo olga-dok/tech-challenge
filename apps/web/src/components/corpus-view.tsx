@@ -1,28 +1,76 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { GenerateCorpusRequestDto } from "@repo/contracts";
+import { useActiveRankingStore } from "../application/active-ranking-store";
 import { httpCorpusRepository } from "../infrastructure/corpus/http-corpus-repository";
 import { useCandidates } from "../infrastructure/corpus/use-candidates";
 import { useCorpusStats } from "../infrastructure/corpus/use-corpus-stats";
+import { ActiveFilterChip } from "./active-filter-chip";
 import { CandidateGallery } from "./candidate-gallery";
+import { ChatPanel } from "./chat-panel";
 import { CorpusToolbar } from "./corpus-toolbar";
 import { EmptyState } from "./empty-state";
 import { GalleryPagination } from "./gallery-pagination";
+import { LanguageSwitcher } from "./language-switcher";
+import { UI_LABELS, type UiLanguage } from "./ui-language";
 import {
   IDLE_GENERATION_STATE,
   type GenerationState,
 } from "./generation-state";
 
-const PAGE_SIZE = 12;
+const MIN_PAGE_SIZE = 3;
+const CARD_HEIGHT_PX = 106;
+const CARD_GAP_PX = 12;
+const RESERVED_CHROME_PX = 320;
 
 export function CorpusView() {
   const searchParams = useSearchParams();
   const page = Math.max(1, Number(searchParams.get("page") ?? "1") || 1);
+  const rankedQuestion = useActiveRankingStore((state) => state.question);
+  const ranking = useActiveRankingStore((state) => state.ranking);
+  const rankingActive = useActiveRankingStore((state) => state.isActive);
+
+  const [pageSize, setPageSize] = useState(10);
+  const [language, setLanguage] = useState<UiLanguage>(() => {
+    if (typeof window === "undefined") {
+      return "en";
+    }
+    const saved = window.localStorage.getItem("ui-language");
+    return saved === "en" || saved === "es" ? saved : "en";
+  });
+
+  useEffect(() => {
+    window.localStorage.setItem("ui-language", language);
+  }, [language]);
+
+  useEffect(() => {
+    const recalculatePageSize = (): void => {
+      const availableHeight = Math.max(
+        window.innerHeight - RESERVED_CHROME_PX,
+        0,
+      );
+      const visibleRows = Math.floor(
+        (availableHeight + CARD_GAP_PX) / (CARD_HEIGHT_PX + CARD_GAP_PX),
+      );
+      setPageSize(Math.max(MIN_PAGE_SIZE, visibleRows));
+    };
+
+    recalculatePageSize();
+    window.addEventListener("resize", recalculatePageSize);
+
+    return () => {
+      window.removeEventListener("resize", recalculatePageSize);
+    };
+  }, []);
 
   const stats = useCorpusStats();
-  const candidatesQuery = useCandidates(page, PAGE_SIZE);
+  const candidatesQuery = useCandidates(
+    page,
+    pageSize,
+    rankingActive ? ranking.map((item) => item.slug) : undefined,
+  );
   const [generation, setGeneration] = useState<GenerationState>(
     IDLE_GENERATION_STATE,
   );
@@ -100,6 +148,7 @@ export function CorpusView() {
   };
 
   const isRunning = generation.status !== "idle";
+  const labels = UI_LABELS[language];
   const candidates = isRunning
     ? generation.streamedCandidates
     : (candidatesQuery.data?.items ?? []);
@@ -107,8 +156,10 @@ export function CorpusView() {
   if (!isRunning && stats.data?.candidates === 0 && candidates.length === 0) {
     return (
       <EmptyState
+        language={language}
         action={
           <CorpusToolbar
+            language={language}
             isIngested={false}
             state={generation}
             onGenerate={startGeneration}
@@ -119,22 +170,47 @@ export function CorpusView() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <CorpusToolbar
-        isIngested={stats.data?.isIngested ?? false}
-        state={generation}
-        onGenerate={startGeneration}
-      />
-      <CandidateGallery
-        candidates={candidates}
-        failedCount={isRunning ? generation.failedCount : undefined}
-      />
-      {!isRunning && candidatesQuery.data ? (
-        <GalleryPagination
-          page={page}
-          totalPages={candidatesQuery.data.totalPages}
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="flex min-h-0 flex-col gap-6">
+        <div className="flex items-center justify-end">
+          <LanguageSwitcher language={language} onChange={setLanguage} />
+        </div>
+        <ChatPanel language={language} />
+      </div>
+
+      <div className="flex flex-col gap-6">
+        <CorpusToolbar
+          language={language}
+          isIngested={stats.data?.isIngested ?? false}
+          state={generation}
+          onGenerate={startGeneration}
         />
-      ) : null}
+        {rankingActive ? (
+          <ActiveFilterChip language={language} totalMatches={ranking.length} />
+        ) : null}
+        <CandidateGallery
+          candidates={candidates}
+          activeQuestion={rankingActive ? rankedQuestion : undefined}
+          language={language}
+          failedCount={isRunning ? generation.failedCount : undefined}
+          ranking={rankingActive ? ranking : undefined}
+        />
+        {!isRunning && candidatesQuery.data ? (
+          <GalleryPagination
+            language={language}
+            page={page}
+            totalPages={candidatesQuery.data.totalPages}
+          />
+        ) : null}
+        {rankingActive ? (
+          <p
+            aria-live="polite"
+            className="text-xs text-zinc-500 dark:text-zinc-400"
+          >
+            {labels.activeRankingFor} {rankedQuestion}
+          </p>
+        ) : null}
+      </div>
     </div>
   );
 }

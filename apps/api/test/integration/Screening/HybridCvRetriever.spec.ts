@@ -246,6 +246,11 @@ describe('HybridCvRetriever', () => {
           citation.section === 'EDUCATION',
       ),
     ).toBe(true);
+    expect(
+      result.ranking.every(
+        (candidate) => candidate.slug.value === 'it-marc-soler',
+      ),
+    ).toBe(true);
   });
 
   it('resolves a named-person query to that specific candidate and loads their full chunk set', async () => {

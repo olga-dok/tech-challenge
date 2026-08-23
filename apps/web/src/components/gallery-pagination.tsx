@@ -2,15 +2,19 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@repo/ui";
+import { UI_LABELS, type UiLanguage } from "./ui-language";
 
 /** Keeps the current page in the `page` search param, so a view is shareable and survives reload. */
 export function GalleryPagination({
+  language,
   page,
   totalPages,
 }: {
+  language: UiLanguage;
   page: number;
   totalPages: number;
 }) {
+  const labels = UI_LABELS[language];
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -27,7 +31,7 @@ export function GalleryPagination({
 
   return (
     <nav
-      aria-label="Gallery pages"
+      aria-label={labels.galleryPages}
       className="flex items-center justify-center gap-3 pt-2"
     >
       <Button
@@ -38,10 +42,10 @@ export function GalleryPagination({
         }}
         disabled={page <= 1}
       >
-        Previous
+        {labels.previous}
       </Button>
       <span className="text-sm text-zinc-600 dark:text-zinc-400">
-        Page {page} of {totalPages}
+        {labels.pageOf(page, totalPages)}
       </span>
       <Button
         variant="outline"
@@ -51,7 +55,7 @@ export function GalleryPagination({
         }}
         disabled={page >= totalPages}
       >
-        Next
+        {labels.next}
       </Button>
     </nav>
   );

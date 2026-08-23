@@ -9,6 +9,7 @@ describe("CorpusToolbar", () => {
   it('shows "Generate corpus" when the corpus is not ingested', () => {
     render(
       <CorpusToolbar
+        language="en"
         isIngested={false}
         state={IDLE_GENERATION_STATE}
         onGenerate={jest.fn()}
@@ -26,6 +27,7 @@ describe("CorpusToolbar", () => {
   it('shows "Regenerate" when the corpus is already ingested', () => {
     render(
       <CorpusToolbar
+        language="en"
         isIngested={true}
         state={IDLE_GENERATION_STATE}
         onGenerate={jest.fn()}
@@ -33,7 +35,7 @@ describe("CorpusToolbar", () => {
     );
 
     expect(
-      screen.getByRole("button", { name: "Regenerate" }),
+      screen.getByRole("button", { name: "Regenerate corpus" }),
     ).toBeInTheDocument();
   });
 
@@ -44,6 +46,7 @@ describe("CorpusToolbar", () => {
     };
     render(
       <CorpusToolbar
+        language="en"
         isIngested={false}
         state={running}
         onGenerate={jest.fn()}
@@ -63,6 +66,7 @@ describe("CorpusToolbar", () => {
     };
     render(
       <CorpusToolbar
+        language="en"
         isIngested={false}
         state={throttled}
         onGenerate={jest.fn()}
@@ -81,6 +85,7 @@ describe("CorpusToolbar", () => {
     };
     render(
       <CorpusToolbar
+        language="en"
         isIngested={true}
         state={endedWithGaps}
         onGenerate={jest.fn()}

@@ -88,7 +88,7 @@ describe('ListCandidatesUseCase', () => {
     expect(bySkill.items.map((c) => c.fullName)).toEqual(['frontend-junior']);
   });
 
-  it('returns exactly the given slugs in the given order, bypassing pagination', async () => {
+  it('returns the given slugs in order and paginates that ranked subset', async () => {
     const repository = repositoryStub();
     repository.seed(candidateFor('ana'));
     repository.seed(candidateFor('bo'));
@@ -97,12 +97,20 @@ describe('ListCandidatesUseCase', () => {
 
     const result = await useCase.execute({
       page: 1,
-      pageSize: 12,
-      slugs: [Slug.fromName('cy'), Slug.fromName('ana')],
+      pageSize: 1,
+      slugs: [Slug.fromName('cy'), Slug.fromName('ana'), Slug.fromName('bo')],
     });
 
-    expect(result.items.map((c) => c.fullName)).toEqual(['cy', 'ana']);
-    expect(result.total).toBe(2);
-    expect(result.totalPages).toBe(1);
+    expect(result.items.map((c) => c.fullName)).toEqual(['cy']);
+    expect(result.total).toBe(3);
+    expect(result.totalPages).toBe(3);
+
+    const secondPage = await useCase.execute({
+      page: 2,
+      pageSize: 1,
+      slugs: [Slug.fromName('cy'), Slug.fromName('ana'), Slug.fromName('bo')],
+    });
+
+    expect(secondPage.items.map((c) => c.fullName)).toEqual(['ana']);
   });
 });

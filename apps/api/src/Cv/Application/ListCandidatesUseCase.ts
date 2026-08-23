@@ -12,16 +12,14 @@ export interface ListCandidatesResult {
 }
 
 /**
- * Paginated browsing, or — when `slugs` is given — an exact ranked list. The
- * two are mutually exclusive on purpose: a chat ranking is a small, ordered
- * set the gallery must show verbatim, not a filter to page through.
+ * Paginated browsing, or — when `slugs` is given — an ordered ranked subset.
  */
 export class ListCandidatesUseCase {
   constructor(private readonly repository: CvRepository) {}
 
   async execute(request: ListCandidatesRequest): Promise<ListCandidatesResult> {
     if (request.slugs !== undefined) {
-      return this.executeOrdered(request.slugs);
+      return this.executeOrdered(request.slugs, request.page, request.pageSize);
     }
 
     const { items, total } = await this.repository.findPage({
@@ -43,6 +41,8 @@ export class ListCandidatesUseCase {
 
   private async executeOrdered(
     slugs: readonly Slug[],
+    page: number,
+    pageSize: number,
   ): Promise<ListCandidatesResult> {
     const found = await this.repository.findBySlugs(slugs);
     const bySlug = new Map(
@@ -52,12 +52,16 @@ export class ListCandidatesUseCase {
       .map((slug) => bySlug.get(slug.value))
       .filter((candidate): candidate is Candidate => candidate !== undefined);
 
+    const total = items.length;
+    const start = Math.max(0, (page - 1) * pageSize);
+    const pagedItems = items.slice(start, start + pageSize);
+
     return {
-      items,
-      page: 1,
-      pageSize: items.length,
-      total: items.length,
-      totalPages: items.length === 0 ? 0 : 1,
+      items: pagedItems,
+      page,
+      pageSize,
+      total,
+      totalPages: total === 0 ? 0 : Math.ceil(total / pageSize),
     };
   }
 }
