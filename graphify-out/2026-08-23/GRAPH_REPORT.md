@@ -1,31 +1,31 @@
 # Graph Report - tech-challenge  (2026-08-23)
 
 ## Corpus Check
-- 235 files · ~67,404 words
+- 246 files · ~71,573 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1527 nodes · 2869 edges · 118 communities (78 shown, 40 thin omitted)
-- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 58 edges (avg confidence: 0.81)
+- 1601 nodes · 3168 edges · 121 communities (81 shown, 40 thin omitted)
+- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 71 edges (avg confidence: 0.81)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `1aa242c7`
+- Built from commit: `a7ee97e0`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - contracts/src/index.ts
 - envSchema.ts
-- CorpusPlan.ts
+- Cv/Domain/index.ts
 - Persona
 - devDependencies
 - AI-Powered CV Screener (project overview)
 - contracts/package.json
 - cv-templates/package.json
-- Embedder.factory.ts
-- CvModule.ts
-- GenerateCvCorpusUseCase.factory.ts
+- CvIngester.spec.ts
+- CvChunker.ts
+- CvStorage.ts
 - cv-templates/src/index.ts
 - GenerateCvCorpusUseCase.ts
 - Candidate
@@ -47,35 +47,35 @@
 - compilerOptions
 - compilerOptions
 - jest
-- compress.py
+- validate.py
 - api/tsconfig.json
 - web/tsconfig.json
 - contracts/tsconfig.build.json
 - cv-templates/tsconfig.build.json
-- validate.py
+- TextExtractor.ts
 - PortraitPainter.factory.ts
 - exclude
 - dotenv-cli
 - Button.tsx
 - probe-ai.ts
-- Persona.ts
+- HttpTransport
 - caveman-compress/README.md
 - cv-templates/tsconfig.json
 - base.mjs
 - contracts/tsconfig.json
 - nest-cli.json
-- SeededRandom
-- api/package.json
+- GenerateCvCorpusAction.spec.ts
+- IngestCvCorpusAction.spec.ts
 - typescript-config/package.json
 - cv/page.tsx
-- @nestjs/core
+- generate-cvs.ts
 - eslint
 - eslint-config-prettier
 - @eslint/eslintrc
 - @eslint/js
 - devDependencies
-- globals
-- Cv/Domain/index.ts
+- Logging/index.ts
+- IngestCvCorpusUseCase.spec.ts
 - @nestjs/cli
 - @nestjs/schematics
 - @nestjs/testing
@@ -102,8 +102,8 @@
 - caveman-explore/package.json
 - caveman-learn/package.json
 - caveman-review
-- .build
-- CvRepository
+- .ingestOne
+- CvModule.ts
 - Config/index.ts
 - Review Caveman evidence
 - Manage eval-gated experiments
@@ -111,7 +111,7 @@
 - Candidate.ts
 - Evaluate an optimization observation
 - caveman-stats
-- CorpusPlan
+- loadEnvFiles.ts
 - caveman-discover/SKILL.md
 - GenerateCvCorpusAction.ts
 - skills/caveman-learn — the Caveman Learn editing skill (MIT, public)
@@ -125,22 +125,25 @@
 - safe-refactor/SKILL.md
 - surgical-patch/SKILL.md
 - verify-and-stop/SKILL.md
-- @repo/cv-templates
+- moduleFileExtensions
 - prettier
 - @types/node
 - typescript-eslint
+- @nestjs/platform-express
+- rxjs
+- jest
 
 ## God Nodes (most connected - your core abstractions)
-1. `Persona` - 51 edges
-2. `Logger` - 50 edges
-3. `Candidate` - 37 edges
-4. `HttpTransport` - 27 edges
-5. `AppConfig` - 25 edges
-6. `scripts` - 24 edges
-7. `Slug` - 23 edges
-8. `BaseError` - 23 edges
-9. `PortraitPainter` - 21 edges
-10. `PortraitImage` - 20 edges
+1. `Logger` - 60 edges
+2. `Persona` - 51 edges
+3. `Candidate` - 47 edges
+4. `AppConfig` - 29 edges
+5. `HttpTransport` - 27 edges
+6. `Slug` - 26 edges
+7. `scripts` - 25 edges
+8. `CvRepository` - 23 edges
+9. `BaseError` - 23 edges
+10. `PortraitPainter` - 21 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `pnpm workspace config (apps/*, packages/*, allowBuilds)` --references--> `packages/contracts (zod schemas shared by api and web)`  [INFERRED]
@@ -162,23 +165,23 @@
 - **Hexagonal Architecture Building Blocks** — agents_hexagonal_architecture, agents_layer_boundaries, agents_factory_pattern, agents_use_case_pattern, agents_controllers_actions, agents_repository_pattern [EXTRACTED 1.00]
 - **Three Backing Pipelines: Generation, Ingestion, Screening** — agents_generation_pipeline, agents_ingestion_pipeline, agents_screening_pipeline [EXTRACTED 1.00]
 
-## Communities (118 total, 40 thin omitted)
+## Communities (121 total, 40 thin omitted)
 
 ### Community 0 - "contracts/src/index.ts"
 Cohesion: 0.06
-Nodes (65): CandidatePageDto, CandidatePageSchema, CandidateSummaryDto, CandidateSummarySchema, CandidateProfile, CandidateProfileSchema, Contact, ContactSchema (+57 more)
+Nodes (67): CandidatePageDto, CandidatePageSchema, CandidateSummaryDto, CandidateSummarySchema, CandidateProfile, CandidateProfileSchema, Contact, ContactSchema (+59 more)
 
 ### Community 1 - "envSchema.ts"
-Cohesion: 0.12
-Nodes (18): collectProviderProblems(), EMBEDDING_DEFAULTS, LLM_DEFAULT_MODELS, optionalString, PORTRAIT_DEFAULT_MODELS, portraitApiKey(), present(), RawEnv (+10 more)
+Cohesion: 0.15
+Nodes (15): collectProviderProblems(), EMBEDDING_DEFAULTS, LLM_DEFAULT_MODELS, optionalString, PORTRAIT_DEFAULT_MODELS, portraitApiKey(), present(), RawEnv (+7 more)
 
-### Community 2 - "CorpusPlan.ts"
-Cohesion: 0.21
-Nodes (17): PlanningDecks, PersonaGender, CityProfile, CV_LANGUAGE_RING, DISTINCTIVE_TRAITS, GivenName, INTERNATIONAL_FAMILY_NAMES, INTERNATIONAL_GIVEN_NAMES (+9 more)
+### Community 2 - "Cv/Domain/index.ts"
+Cohesion: 0.06
+Nodes (40): buildDecks(), draw(), MAX_CORPUS_SIZE, PlanningDecks, templateIdFor(), CyclicDeck, InvalidCorpusPlanError, InvalidPersonaError (+32 more)
 
 ### Community 3 - "Persona"
-Cohesion: 0.14
-Nodes (8): Persona, PortraitImage, ageBand(), buildPortraitPrompt(), portraitSeed(), subject(), HUGGINGFACE_PROVIDER, escapeXml()
+Cohesion: 0.17
+Nodes (6): Persona, ageBand(), buildPortraitPrompt(), portraitSeed(), subject(), HUGGINGFACE_PROVIDER
 
 ### Community 4 - "devDependencies"
 Cohesion: 0.04
@@ -196,33 +199,33 @@ Nodes (38): dependencies, zod, devDependencies, eslint, jest, @repo/eslint-confi
 Cohesion: 0.05
 Nodes (38): dependencies, @repo/contracts, devDependencies, eslint, jest, @repo/eslint-config, @repo/typescript-config, ts-jest (+30 more)
 
-### Community 8 - "Embedder.factory.ts"
-Cohesion: 0.10
+### Community 8 - "CvIngester.spec.ts"
+Cohesion: 0.09
 Nodes (12): Embedder, EmbedderId, EmbeddingFailedError, GeminiEmbedder, normalise(), responseSchema, ExtractorLoader, FeatureExtractor (+4 more)
 
-### Community 9 - "CvModule.ts"
-Cohesion: 0.05
-Nodes (38): CorpusAlreadyGeneratingError, CorpusRunLock, CvChunk, bucketBySection(), chunkCv(), ENTRY_PER_CHUNK_SECTIONS, estimateTokens(), expandOversizePieces() (+30 more)
+### Community 9 - "CvChunker.ts"
+Cohesion: 0.18
+Nodes (17): bucketBySection(), chunkCv(), detectCvLanguage(), ENTRY_PER_CHUNK_SECTIONS, estimateTokens(), expandOversizePieces(), firstLine(), LANGUAGES (+9 more)
 
-### Community 10 - "GenerateCvCorpusUseCase.factory.ts"
-Cohesion: 0.36
-Nodes (5): CvStorage, CvStorageId, StoredCvFiles, EXTENSIONS, FileSystemCvStorage
+### Community 10 - "CvStorage.ts"
+Cohesion: 0.33
+Nodes (6): CvStorage, CvStorageId, StoredCvFiles, CvStorageFactory, EXTENSIONS, FileSystemCvStorage
 
 ### Community 11 - "cv-templates/src/index.ts"
 Cohesion: 0.27
 Nodes (17): CvDocumentRequest, renderClassicTemplate(), renderCvHtml(), TEMPLATES, requestFor(), renderHeaderBandTemplate(), renderSidebarTemplate(), sampleProfile() (+9 more)
 
 ### Community 12 - "GenerateCvCorpusUseCase.ts"
-Cohesion: 0.16
-Nodes (11): CorpusIngester, CorpusIngesterId, GenerateCvCorpusRequest, GenerateCvCorpusDependencies, GenerateCvCorpusUseCase, toCandidateSummary(), BatchPacing, intoBatches() (+3 more)
+Cohesion: 0.15
+Nodes (10): GenerateCvCorpusRequest, GenerateCvCorpusDependencies, GenerateCvCorpusUseCase, toCandidateSummary(), BatchPacing, intoBatches(), nextBatchDelay(), CorpusPlan (+2 more)
 
 ### Community 13 - "Candidate"
-Cohesion: 0.10
-Nodes (3): PersonaOutcome, Candidate, PrismaCvRepository
+Cohesion: 0.09
+Nodes (5): PersonaOutcome, Candidate, PrismaCvRepository, candidateFor(), candidateWith()
 
 ### Community 14 - "Http/index.ts"
-Cohesion: 0.12
-Nodes (14): HttpTransportFactory, HttpModule, Module, HttpRequestFailedError, BinaryResponse, Fetch, HttpRequest, HttpTransport (+6 more)
+Cohesion: 0.15
+Nodes (14): HttpTransportFactory, HttpModule, Module, HttpRequestFailedError, BinaryResponse, Fetch, HttpRequest, RetryableError (+6 more)
 
 ### Community 15 - "tasks"
 Cohesion: 0.09
@@ -230,11 +233,11 @@ Nodes (21): nextConfig, geistMono, geistSans, metadata, ^build, .next/**, depend
 
 ### Community 16 - "scripts"
 Cohesion: 0.08
-Nodes (24): scripts, build, db:generate, db:migrate, db:migrate:dev, db:studio, dev, format (+16 more)
+Nodes (25): scripts, build, db:generate, db:migrate, db:migrate:dev, db:studio, dev, format (+17 more)
 
 ### Community 17 - "Slug"
-Cohesion: 0.11
-Nodes (3): InvalidSlugError, Slug, BaseError
+Cohesion: 0.13
+Nodes (4): InvalidSlugError, Slug, existingCandidateFor(), candidateNamed()
 
 ### Community 18 - "devDependencies"
 Cohesion: 0.08
@@ -242,14 +245,14 @@ Nodes (23): @next/eslint-plugin-next, devDependencies, eslint, eslint-config-nex
 
 ### Community 19 - "scripts"
 Cohesion: 0.08
-Nodes (23): devDependencies, turbo, turbo, name, packageManager, private, scripts, build (+15 more)
+Nodes (24): devDependencies, turbo, turbo, name, packageManager, private, scripts, build (+16 more)
 
 ### Community 20 - "dependencies"
 Cohesion: 0.09
-Nodes (23): dependencies, dotenv, @huggingface/transformers, @nestjs/common, @nestjs/platform-express, pdf-parse, @prisma/client, puppeteer (+15 more)
+Nodes (23): dependencies, dotenv, @huggingface/transformers, @nestjs/common, @nestjs/core, pdf-parse, @prisma/client, puppeteer (+15 more)
 
 ### Community 21 - "Logger"
-Cohesion: 0.35
+Cohesion: 0.27
 Nodes (3): HuggingFacePortraitPainter, Logger, LlmConfig
 
 ### Community 22 - "ui/package.json"
@@ -257,24 +260,24 @@ Cohesion: 0.09
 Nodes (21): class-variance-authority, clsx, dependencies, class-variance-authority, clsx, devDependencies, @types/react, @types/react-dom (+13 more)
 
 ### Community 23 - "PuppeteerPdfRenderer.ts"
-Cohesion: 0.15
+Cohesion: 0.13
 Nodes (10): main(), CvRenderRequest, PdfRenderer, PdfRendererId, PdfRenderingError, PdfRendererFactory, BrowserLauncher, PuppeteerPdfRenderer (+2 more)
 
 ### Community 24 - "generationDoubles.ts"
-Cohesion: 0.19
-Nodes (14): CONFIG, TestCvModule, Module, useCaseFor(), DrafterStub, existingCandidateFor(), painterStub(), rateLimitError() (+6 more)
+Cohesion: 0.18
+Nodes (10): CvChunk, EmbeddedCvChunk, CandidateRow, DrafterStub, rateLimitError(), ReplaceChunksCall, RepositoryStub, StorageStub (+2 more)
 
 ### Community 25 - "Shared/Domain/index.ts"
-Cohesion: 0.23
-Nodes (6): LogContext, LoggerId, LoggerFactory, format(), NestLogger, RFC-7807
+Cohesion: 0.15
+Nodes (8): PortraitPaintingError, BaseError, LogContext, format(), NestLogger, painterThat, RecordedLine, RFC-7807
 
 ### Community 26 - "profileDrafters.spec.ts"
 Cohesion: 0.06
-Nodes (35): ProfileDrafter, ProfileDrafterId, ProfileDraftingError, buildProfilePrompt(), buildRepairPrompt(), LANGUAGE_NAMES, ProfilePrompt, attempt() (+27 more)
+Nodes (36): ProfileDrafter, ProfileDrafterId, ProfileDraftingError, buildProfilePrompt(), buildRepairPrompt(), LANGUAGE_NAMES, ProfilePrompt, attempt() (+28 more)
 
 ### Community 27 - "GeminiPortraitPainter.spec.ts"
 Cohesion: 0.31
-Nodes (4): personaFixture(), profileFixture(), imageBase64, render()
+Nodes (3): personaFixture(), imageBase64, render()
 
 ### Community 28 - "compilerOptions"
 Cohesion: 0.14
@@ -290,11 +293,11 @@ Nodes (13): compilerOptions, declaration, emitDecoratorMetadata, experimentalDec
 
 ### Community 31 - "jest"
 Cohesion: 0.15
-Nodes (13): jest, collectCoverageFrom, coverageDirectory, moduleFileExtensions, rootDir, testEnvironment, testRegex, transform (+5 more)
+Nodes (12): jest, collectCoverageFrom, coverageDirectory, rootDir, testEnvironment, testRegex, transform, name (+4 more)
 
-### Community 32 - "compress.py"
-Cohesion: 0.10
-Nodes (37): main(), print_usage(), backup_dir_for(), build_compress_prompt(), build_fix_prompt(), call_claude(), compress_file(), first_nonblank_line() (+29 more)
+### Community 32 - "validate.py"
+Cohesion: 0.05
+Nodes (65): benchmark_pair(), count_tokens(), main(), print_table(), Path, main(), print_usage(), backup_dir_for() (+57 more)
 
 ### Community 33 - "api/tsconfig.json"
 Cohesion: 0.17
@@ -312,13 +315,13 @@ Nodes (11): compilerOptions, outDir, rootDir, exclude, extends, include, dist, n
 Cohesion: 0.17
 Nodes (11): compilerOptions, outDir, rootDir, exclude, extends, include, dist, node_modules (+3 more)
 
-### Community 37 - "validate.py"
-Cohesion: 0.11
-Nodes (28): benchmark_pair(), count_tokens(), main(), print_table(), Path, count_bullets(), extract_code_blocks(), extract_fenced_spans() (+20 more)
+### Community 37 - "TextExtractor.ts"
+Cohesion: 0.24
+Nodes (9): TextExtractionFailure, TextExtractionFailureReason, TextExtractionResult, TextExtractor, TextExtractorId, DEFAULT_MAX_PDF_BYTES, PdfParseTextExtractor, TextExtractorFactory (+1 more)
 
 ### Community 38 - "PortraitPainter.factory.ts"
-Cohesion: 0.17
-Nodes (14): PortraitPainter, PortraitPainterId, PortraitPaintingError, FallbackPortraitPainter, GEMINI_PORTRAIT_PROVIDER, GeminiPortraitPainter, responseSchema, POLLINATIONS_PROVIDER (+6 more)
+Cohesion: 0.22
+Nodes (12): PortraitImage, PortraitPainter, FallbackPortraitPainter, GEMINI_PORTRAIT_PROVIDER, GeminiPortraitPainter, responseSchema, POLLINATIONS_PROVIDER, PollinationsPortraitPainter (+4 more)
 
 ### Community 39 - "exclude"
 Cohesion: 0.20
@@ -329,12 +332,8 @@ Cohesion: 0.36
 Nodes (4): Button(), ButtonProps, buttonVariants, Input()
 
 ### Community 42 - "probe-ai.ts"
-Cohesion: 0.19
-Nodes (15): CliOptions, main(), pad(), parseOptions(), render(), extensionFor(), main(), seconds() (+7 more)
-
-### Community 43 - "Persona.ts"
 Cohesion: 0.18
-Nodes (6): InvalidPersonaError, PersonaAttributes, REQUIRED_TEXT_FIELDS, caughtError(), caughtRejection(), ATTRIBUTES
+Nodes (15): CliOptions, IngestCvsModule, main(), parseOptions(), render(), Module, extensionFor(), main() (+7 more)
 
 ### Community 44 - "caveman-compress/README.md"
 Cohesion: 0.09
@@ -352,29 +351,37 @@ Nodes (6): exclude, extends, include, node_modules, @repo/typescript-config/base
 Cohesion: 0.33
 Nodes (5): collection, compilerOptions, deleteOutDir, $schema, sourceRoot
 
-### Community 49 - "SeededRandom"
-Cohesion: 0.18
-Nodes (4): buildDecks(), draw(), CyclicDeck, SeededRandom
+### Community 49 - "GenerateCvCorpusAction.spec.ts"
+Cohesion: 0.29
+Nodes (7): CONFIG, TestCvModule, Module, useCaseFor(), painterStub(), rendererStub(), run()
 
-### Community 50 - "api/package.json"
-Cohesion: 0.50
-Nodes (3): name, private, version
+### Community 50 - "IngestCvCorpusAction.spec.ts"
+Cohesion: 0.31
+Nodes (6): CONFIG, embedderStub(), extractorStub(), TestCvModule, Module, useCaseFor()
 
 ### Community 51 - "typescript-config/package.json"
 Cohesion: 0.50
 Nodes (3): name, private, version
 
+### Community 53 - "generate-cvs.ts"
+Cohesion: 0.36
+Nodes (7): CliOptions, GenerateCvsModule, main(), pad(), parseOptions(), render(), Module
+
 ### Community 58 - "devDependencies"
 Cohesion: 0.29
-Nodes (7): devDependencies, eslint-plugin-prettier, jest, ts-loader, eslint-plugin-prettier, jest, ts-loader
+Nodes (7): devDependencies, eslint-plugin-prettier, globals, ts-loader, eslint-plugin-prettier, globals, ts-loader
 
-### Community 60 - "Cv/Domain/index.ts"
-Cohesion: 0.25
-Nodes (9): MAX_CORPUS_SIZE, applyPlantedCase(), PLANTED_CASE_INDEXES, PLANTED_GIVEN_NAME, PLANTED_GIVEN_NAME_GENDER, PLANTED_TRAITS, SMALLEST_COMPLETE_CORPUS, UPC_INSTITUTION (+1 more)
+### Community 59 - "Logging/index.ts"
+Cohesion: 0.48
+Nodes (4): LoggerFactory, LoggerModule, Global, Module
+
+### Community 60 - "IngestCvCorpusUseCase.spec.ts"
+Cohesion: 0.53
+Nodes (4): embedderStub(), extractorStub(), rawTextFor(), runIngest()
 
 ### Community 64 - "AppConfig"
-Cohesion: 0.19
-Nodes (8): GenerateCvsModule, Module, ProbeModule, Module, AppModule, Module, bootstrap(), AppConfig
+Cohesion: 0.27
+Nodes (4): AppModule, Module, bootstrap(), AppConfig
 
 ### Community 71 - "cavecrew/SKILL.md"
 Cohesion: 0.14
@@ -412,13 +419,9 @@ Nodes (10): description, files, SKILL.md, license, name, private, scripts, test 
 Cohesion: 0.18
 Nodes (9): caveman-review, Example output, How to invoke, See also, What it does, Auto-Clarity, Boundaries, Examples (+1 more)
 
-### Community 89 - ".build"
-Cohesion: 0.20
-Nodes (4): InvalidCorpusPlanError, personas(), plan(), personaWith()
-
-### Community 90 - "CvRepository"
-Cohesion: 0.25
-Nodes (4): CvRepository, CvRepositoryId, CvRepositoryFactory, CandidateRow
+### Community 90 - "CvModule.ts"
+Cohesion: 0.15
+Nodes (18): CorpusIngester, CorpusIngesterId, CvIngester, IngestOutcome, IngestCvCorpusRequest, IngestCvCorpusDependencies, IngestCvCorpusUseCase, mapWithConcurrency() (+10 more)
 
 ### Community 91 - "Config/index.ts"
 Cohesion: 0.33
@@ -448,9 +451,17 @@ Nodes (6): 1. Read the exact observations, 2. Ask the operator to choose, 3. Des
 Cohesion: 0.29
 Nodes (5): caveman-stats, Example output, How to invoke, See also, What it does
 
+### Community 98 - "loadEnvFiles.ts"
+Cohesion: 0.50
+Nodes (3): CANDIDATE_PATHS, loadEnvFiles(), TRACKED_KEYS
+
 ### Community 99 - "caveman-discover/SKILL.md"
 Cohesion: 0.33
 Nodes (5): Step 1 — Inventory the workflows, Step 2 — Name them, Step 3 — Propose, then apply, Step 4 — Verify, Step 5 — Report
+
+### Community 100 - "GenerateCvCorpusAction.ts"
+Cohesion: 0.09
+Nodes (18): CorpusAlreadyGeneratingError, CorpusRunLock, GenerateCvCorpusAction, Body, Controller, Inject, Post, Res (+10 more)
 
 ### Community 101 - "skills/caveman-learn — the Caveman Learn editing skill (MIT, public)"
 Cohesion: 0.40
@@ -460,25 +471,29 @@ Nodes (4): Boundary (binding), Install path, Layout, skills/caveman-learn — th
 Cohesion: 0.40
 Nodes (4): caveman-learn skill, Honesty, Install, What it does
 
+### Community 112 - "moduleFileExtensions"
+Cohesion: 0.50
+Nodes (4): moduleFileExtensions, ts, js, json
+
 ## Knowledge Gaps
-- **496 isolated node(s):** `name`, `version`, `license`, `private`, `type` (+491 more)
+- **501 isolated node(s):** `name`, `version`, `license`, `private`, `type` (+496 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **40 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Logger` connect `Logger` to `Persona`, `GenerateCvCorpusAction.ts`, `PortraitPainter.factory.ts`, `Embedder.factory.ts`, `CvModule.ts`, `GenerateCvCorpusUseCase.factory.ts`, `GenerateCvCorpusUseCase.ts`, `Http/index.ts`, `PuppeteerPdfRenderer.ts`, `Shared/Domain/index.ts`, `profileDrafters.spec.ts`?**
+- **Why does `Logger` connect `Logger` to `.ingestOne`, `profileDrafters.spec.ts`, `GenerateCvCorpusAction.ts`, `TextExtractor.ts`, `PortraitPainter.factory.ts`, `Persona`, `CvIngester.spec.ts`, `HttpTransport`, `GenerateCvCorpusUseCase.ts`, `Http/index.ts`, `PuppeteerPdfRenderer.ts`, `Shared/Domain/index.ts`, `CvModule.ts`?**
+  _High betweenness centrality (0.032) - this node is a cross-community bridge._
+- **Why does `Persona` connect `Persona` to `Cv/Domain/index.ts`, `PortraitPainter.factory.ts`, `GenerateCvCorpusUseCase.ts`, `Slug`, `Logger`, `generationDoubles.ts`, `profileDrafters.spec.ts`, `GeminiPortraitPainter.spec.ts`, `Candidate.ts`?**
+  _High betweenness centrality (0.017) - this node is a cross-community bridge._
+- **Why does `Candidate` connect `Candidate` to `Cv/Domain/index.ts`, `CvIngester.spec.ts`, `GenerateCvCorpusUseCase.ts`, `Slug`, `IngestCvCorpusAction.spec.ts`, `generationDoubles.ts`, `.ingestOne`, `CvModule.ts`, `IngestCvCorpusUseCase.spec.ts`, `Candidate.ts`?**
   _High betweenness centrality (0.016) - this node is a cross-community bridge._
-- **Why does `Persona` connect `Persona` to `CorpusPlan.ts`, `CorpusPlan`, `PortraitPainter.factory.ts`, `Persona.ts`, `GenerateCvCorpusUseCase.ts`, `Slug`, `generationDoubles.ts`, `.build`, `profileDrafters.spec.ts`, `GeminiPortraitPainter.spec.ts`, `Cv/Domain/index.ts`, `Candidate.ts`?**
-  _High betweenness centrality (0.013) - this node is a cross-community bridge._
-- **Why does `AppConfig` connect `AppConfig` to `envSchema.ts`, `GenerateCvCorpusAction.ts`, `PortraitPainter.factory.ts`, `Embedder.factory.ts`, `CvModule.ts`, `probe-ai.ts`, `GenerateCvCorpusUseCase.factory.ts`, `Prisma/index.ts`, `generationDoubles.ts`, `profileDrafters.spec.ts`, `Config/index.ts`, `Candidate.ts`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
 - **What connects `name`, `version`, `license` to the rest of the system?**
-  _496 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _501 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `contracts/src/index.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.05824561403508772 - nodes in this community are weakly interconnected._
-- **Should `envSchema.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.11904761904761904 - nodes in this community are weakly interconnected._
-- **Should `Persona` be split into smaller, more focused modules?**
-  _Cohesion score 0.14153846153846153 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05661005661005661 - nodes in this community are weakly interconnected._
+- **Should `Cv/Domain/index.ts` be split into smaller, more focused modules?**
+  _Cohesion score 0.057942057942057944 - nodes in this community are weakly interconnected._
+- **Should `devDependencies` be split into smaller, more focused modules?**
+  _Cohesion score 0.041666666666666664 - nodes in this community are weakly interconnected._

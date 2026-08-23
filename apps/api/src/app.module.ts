@@ -1,5 +1,6 @@
 import { type DynamicModule, Module } from '@nestjs/common';
 import { CvModule } from './Cv/Infrastructure/CvModule';
+import { ScreeningModule } from './Screening/Infrastructure/ScreeningModule';
 import { type AppConfig, ConfigModule } from './Shared/Infrastructure/Config';
 import { LoggerModule } from './Shared/Infrastructure/Logging';
 import { PrismaModule } from './Shared/Infrastructure/Prisma';
@@ -19,6 +20,7 @@ export class AppModule {
         LoggerModule,
         PrismaModule,
         CvModule,
+        ScreeningModule,
       ],
     };
   }

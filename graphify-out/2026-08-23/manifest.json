@@ -12,9 +12,9 @@
     "semantic_hash": "b6c9c4b64b7092bea720263a47b574cf"
   },
   "apps/api/package.json": {
-    "mtime": 1787495041.491739,
-    "seen": 1787496544.3731115,
-    "ast_hash": "e2c8a3f880b0cc44b7e52125eb23065c",
+    "mtime": 1787497921.8996208,
+    "seen": 1787498221.3335838,
+    "ast_hash": "ad7be862b9bdea60b116ef098a4dcebc",
     "semantic_hash": ""
   },
   "apps/api/prisma/migrations/20260822172609_init_cv_corpus/migration.sql": {
@@ -72,10 +72,10 @@
     "semantic_hash": "7112e87c584111ea81d049e8d7381de3"
   },
   "apps/api/src/Cv/Domain/Candidate.ts": {
-    "mtime": 1787435741.3984272,
-    "seen": 1787490457.9381278,
-    "ast_hash": "5ba21b00317b6fa951a5c3f3706d931e",
-    "semantic_hash": "5ba21b00317b6fa951a5c3f3706d931e"
+    "mtime": 1787497132.0258207,
+    "seen": 1787498221.333926,
+    "ast_hash": "315f4bb18eff270f78770e29191ed1e9",
+    "semantic_hash": ""
   },
   "apps/api/src/Cv/Domain/CorpusPlan.ts": {
     "mtime": 1787438185.029732,
@@ -84,10 +84,10 @@
     "semantic_hash": "3c95c01beea309e419cd7c17c90105dd"
   },
   "apps/api/src/Cv/Domain/CvRepository.ts": {
-    "mtime": 1787435757.2136378,
-    "seen": 1787490457.9381316,
-    "ast_hash": "ad890776c2125a565782828e957254b6",
-    "semantic_hash": "ad890776c2125a565782828e957254b6"
+    "mtime": 1787497142.333944,
+    "seen": 1787498221.3339736,
+    "ast_hash": "d40f29d9f438b8672a714218e557d7ae",
+    "semantic_hash": ""
   },
   "apps/api/src/Cv/Domain/CvStorage.ts": {
     "mtime": 1787436189.5963945,
@@ -234,9 +234,9 @@
     "semantic_hash": "f9ea8c1cc9f7d2d29d84f4f9abdba7af"
   },
   "apps/api/src/Cv/Infrastructure/CvModule.ts": {
-    "mtime": 1787495066.4970417,
-    "seen": 1787496544.3745651,
-    "ast_hash": "c6f48af1295ca8685daeb72721080409",
+    "mtime": 1787497829.013484,
+    "seen": 1787498221.3350844,
+    "ast_hash": "59081bbbc84c437256793d284ceffd0a",
     "semantic_hash": ""
   },
   "apps/api/src/Cv/Infrastructure/Drafter/GeminiProfileDrafter.ts": {
@@ -318,10 +318,10 @@
     "semantic_hash": "c37c0e9ddb76af46a14a64a214d4fb84"
   },
   "apps/api/src/Cv/Infrastructure/Factory/GenerateCvCorpusUseCase.factory.ts": {
-    "mtime": 1787435973.0665116,
-    "seen": 1787490457.938204,
-    "ast_hash": "69671ee9293cbca4d04205c2e4ddd7cc",
-    "semantic_hash": "69671ee9293cbca4d04205c2e4ddd7cc"
+    "mtime": 1787497805.1131892,
+    "seen": 1787498221.3357615,
+    "ast_hash": "abb5f32022bdf085cbb0b71c70567d3b",
+    "semantic_hash": ""
   },
   "apps/api/src/Cv/Infrastructure/Factory/PdfRenderer.factory.ts": {
     "mtime": 1787433922.9560432,
@@ -342,10 +342,10 @@
     "semantic_hash": "61953b4ce18eeaf3934e9deb1f5ad5e4"
   },
   "apps/api/src/Cv/Infrastructure/Persistence/PrismaCvRepository.ts": {
-    "mtime": 1787435900.1955414,
-    "seen": 1787490457.9382114,
-    "ast_hash": "8e20d593ef1d5e6eca85ade9504c3516",
-    "semantic_hash": "8e20d593ef1d5e6eca85ade9504c3516"
+    "mtime": 1787497248.9162173,
+    "seen": 1787498221.3359537,
+    "ast_hash": "66f257528fb78de1632ce66a7423d703",
+    "semantic_hash": ""
   },
   "apps/api/src/Cv/Infrastructure/Portrait/FallbackPortraitPainter.ts": {
     "mtime": 1787424129.36164,
@@ -588,10 +588,10 @@
     "semantic_hash": "5b3ab99e9e9e53c7c70cfa2bdcc48701"
   },
   "apps/api/test/integration/Cv/PrismaCvRepository.spec.ts": {
-    "mtime": 1787436189.5923944,
-    "seen": 1787490457.9382882,
-    "ast_hash": "82d7564910daae28934e98e88d48b995",
-    "semantic_hash": "82d7564910daae28934e98e88d48b995"
+    "mtime": 1787498037.4640272,
+    "seen": 1787498221.3378634,
+    "ast_hash": "76bfd8387134ebb0dc7dfe26db1378fd",
+    "semantic_hash": ""
   },
   "apps/api/test/jest-e2e.json": {
     "mtime": 1787361367.8426042,
@@ -618,10 +618,10 @@
     "semantic_hash": "5d4b001fbc286718c9f90c9dd0ce0f2c"
   },
   "apps/api/test/support/generationDoubles.ts": {
-    "mtime": 1787436189.5923944,
-    "seen": 1787490457.9382925,
-    "ast_hash": "fc2109612c4498059e8a1016a4bc8570",
-    "semantic_hash": "fc2109612c4498059e8a1016a4bc8570"
+    "mtime": 1787497283.0326242,
+    "seen": 1787498221.3380527,
+    "ast_hash": "1944c112e74b1337bed218cb722689cb",
+    "semantic_hash": ""
   },
   "apps/api/test/unit/Cv/Application/GenerateCvCorpusUseCase.spec.ts": {
     "mtime": 1787436236.1660938,
@@ -816,10 +816,10 @@
     "semantic_hash": "da4f05d6f0fe5aa64da465b4cbbf5a8f"
   },
   "package.json": {
-    "mtime": 1787436016.3056152,
-    "seen": 1787490457.9383273,
-    "ast_hash": "73c585907e56ad3fcd0c033e9d97dbd0",
-    "semantic_hash": "73c585907e56ad3fcd0c033e9d97dbd0"
+    "mtime": 1787497934.5667748,
+    "seen": 1787498221.339787,
+    "ast_hash": "5cead5d39911a3e8c7e97a0e7f2533cf",
+    "semantic_hash": ""
   },
   "packages/contracts/eslint.config.mjs": {
     "mtime": 1787420959.553221,
@@ -852,10 +852,10 @@
     "semantic_hash": "69f24111a308f495faf5ad047fb5580a"
   },
   "packages/contracts/src/corpus.ts": {
-    "mtime": 1787438144.5804367,
-    "seen": 1787490457.9383323,
-    "ast_hash": "ce21dffb09af0782f98655be4bb6833c",
-    "semantic_hash": "ce21dffb09af0782f98655be4bb6833c"
+    "mtime": 1787497838.6596029,
+    "seen": 1787498221.3399673,
+    "ast_hash": "c3dba81374e47940be990731240dd130",
+    "semantic_hash": ""
   },
   "packages/contracts/src/enums.ts": {
     "mtime": 1787434884.9010239,
@@ -870,10 +870,10 @@
     "semantic_hash": "5fe915aa143bbf45ba80878bb0e043d1"
   },
   "packages/contracts/src/index.ts": {
-    "mtime": 1787434528.223853,
-    "seen": 1787490457.938335,
-    "ast_hash": "19423ac0089b4576067ce5154547b6e9",
-    "semantic_hash": "19423ac0089b4576067ce5154547b6e9"
+    "mtime": 1787497850.898754,
+    "seen": 1787498221.3400624,
+    "ast_hash": "a6772815f73918c3a91fc71aede7a85e",
+    "semantic_hash": ""
   },
   "packages/contracts/src/pagination.ts": {
     "mtime": 1787421012.1889687,
@@ -1188,15 +1188,15 @@
     "semantic_hash": ""
   },
   "apps/api/src/Cv/Domain/CvChunk.ts": {
-    "mtime": 1787494404.9490335,
-    "seen": 1787496544.3734798,
-    "ast_hash": "846daf79f243e5b09f43e0e6ade7df08",
+    "mtime": 1787497118.1126544,
+    "seen": 1787498221.3339715,
+    "ast_hash": "4bbe7e994979d48edab278c1fa88df20",
     "semantic_hash": ""
   },
   "apps/api/src/Cv/Domain/CvChunker.ts": {
-    "mtime": 1787495157.3351414,
-    "seen": 1787496544.3734813,
-    "ast_hash": "c3a9d9226f071060c1a070135634a894",
+    "mtime": 1787497084.499251,
+    "seen": 1787498221.3339725,
+    "ast_hash": "b9a8dab434daca663188dca3231dc8d3",
     "semantic_hash": ""
   },
   "apps/api/src/Cv/Domain/TextExtractor.ts": {
@@ -1224,9 +1224,9 @@
     "semantic_hash": ""
   },
   "apps/api/test/unit/Cv/Domain/CvChunker.spec.ts": {
-    "mtime": 1787495157.3351414,
-    "seen": 1787496544.378072,
-    "ast_hash": "11e8b05b811087709aaa0964e6f51c25",
+    "mtime": 1787498037.4640272,
+    "seen": 1787498221.3382273,
+    "ast_hash": "8a32c941b7d3b44e85a5e00bd5d50756",
     "semantic_hash": ""
   },
   "apps/api/test/unit/Cv/Infrastructure/Extraction/PdfParseTextExtractor.spec.ts": {
@@ -1455,6 +1455,66 @@
     "mtime": 1787493189.4540346,
     "seen": 1787496544.38115,
     "ast_hash": "0fcf3d3b783820fdd064244e95912b15",
+    "semantic_hash": ""
+  },
+  "apps/api/scripts/ingest-cvs.ts": {
+    "mtime": 1787497913.6525204,
+    "seen": 1787498221.3336241,
+    "ast_hash": "ec315367d84dc5626ff946fc3ef7870f",
+    "semantic_hash": ""
+  },
+  "apps/api/src/Cv/Application/CvIngester.ts": {
+    "mtime": 1787497651.6222959,
+    "seen": 1787498221.3337882,
+    "ast_hash": "74a030c47fba9d96bd3bf0cc52a76f46",
+    "semantic_hash": ""
+  },
+  "apps/api/src/Cv/Application/IngestCvCorpusRequest.ts": {
+    "mtime": 1787497593.7225685,
+    "seen": 1787498221.333878,
+    "ast_hash": "47c954c999734cf47b84a7d237088400",
+    "semantic_hash": ""
+  },
+  "apps/api/src/Cv/Application/IngestCvCorpusUseCase.ts": {
+    "mtime": 1787498037.4640272,
+    "seen": 1787498221.3338797,
+    "ast_hash": "87b1b6ad7c6e5695337ef7e470684824",
+    "semantic_hash": ""
+  },
+  "apps/api/src/Cv/Infrastructure/Action/IngestCvCorpusAction.ts": {
+    "mtime": 1787497870.7479982,
+    "seen": 1787498221.3350832,
+    "ast_hash": "5d176a549273753aad5e213ab1fe32dc",
+    "semantic_hash": ""
+  },
+  "apps/api/src/Cv/Infrastructure/Factory/CvIngester.factory.ts": {
+    "mtime": 1787498037.4640272,
+    "seen": 1787498221.3356173,
+    "ast_hash": "225fc763145acacfbe1bf05c331ae0d0",
+    "semantic_hash": ""
+  },
+  "apps/api/src/Cv/Infrastructure/Factory/IngestCvCorpusUseCase.factory.ts": {
+    "mtime": 1787497773.486799,
+    "seen": 1787498221.3357627,
+    "ast_hash": "adb2f8398e0aa25da8044e9b3b55944f",
+    "semantic_hash": ""
+  },
+  "apps/api/test/integration/Cv/IngestCvCorpusAction.spec.ts": {
+    "mtime": 1787498037.4640272,
+    "seen": 1787498221.3378615,
+    "ast_hash": "001cc855c35b2923a5790cb0dba741ab",
+    "semantic_hash": ""
+  },
+  "apps/api/test/unit/Cv/Application/CvIngester.spec.ts": {
+    "mtime": 1787498037.4640272,
+    "seen": 1787498221.3380544,
+    "ast_hash": "56897c72cae9fd7be8d173acf16b5530",
+    "semantic_hash": ""
+  },
+  "apps/api/test/unit/Cv/Application/IngestCvCorpusUseCase.spec.ts": {
+    "mtime": 1787498037.4640272,
+    "seen": 1787498221.338121,
+    "ast_hash": "db8507a0c3639c6c9984c353304ca981",
     "semantic_hash": ""
   }
 }
