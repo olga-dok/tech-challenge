@@ -57,3 +57,7 @@ Thumbs.db
 
 # Misc
 *.logdocs/
+
+# Graphify generated output
+graphify-out/
+apps/api/graphify-out/
