@@ -1,7 +1,7 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { GenerateCorpusRequestDto } from "@repo/contracts";
 import { useActiveRankingStore } from "../application/active-ranking-store";
 import { httpCorpusRepository } from "../infrastructure/corpus/http-corpus-repository";
@@ -13,8 +13,12 @@ import { ChatPanel } from "./chat-panel";
 import { CorpusToolbar } from "./corpus-toolbar";
 import { EmptyState } from "./empty-state";
 import { GalleryPagination } from "./gallery-pagination";
-import { LanguageSwitcher } from "./language-switcher";
-import { UI_LABELS, type UiLanguage } from "./ui-language";
+import {
+  clampPage,
+  rankingChanged,
+  rankingQuestionChanged,
+} from "./ranked-pagination";
+import type { UiLanguage } from "./ui-language";
 import {
   IDLE_GENERATION_STATE,
   type GenerationState,
@@ -23,27 +27,30 @@ import {
 const MIN_PAGE_SIZE = 3;
 const CARD_HEIGHT_PX = 106;
 const CARD_GAP_PX = 12;
-const RESERVED_CHROME_PX = 320;
+const RESERVED_CHROME_PX = 240;
 
-export function CorpusView() {
+export function CorpusView({
+  language,
+  onLanguageChange,
+}: {
+  language: UiLanguage;
+  onLanguageChange: (language: UiLanguage) => void;
+}) {
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const page = Math.max(1, Number(searchParams.get("page") ?? "1") || 1);
   const rankedQuestion = useActiveRankingStore((state) => state.question);
   const ranking = useActiveRankingStore((state) => state.ranking);
   const rankingActive = useActiveRankingStore((state) => state.isActive);
+  const rankingSignature = useMemo(
+    () => ranking.map((item) => item.slug).join(","),
+    [ranking],
+  );
+  const previousRankingSignature = useRef<string>(rankingSignature);
+  const previousRankedQuestion = useRef<string>(rankedQuestion);
 
   const [pageSize, setPageSize] = useState(10);
-  const [language, setLanguage] = useState<UiLanguage>(() => {
-    if (typeof window === "undefined") {
-      return "en";
-    }
-    const saved = window.localStorage.getItem("ui-language");
-    return saved === "en" || saved === "es" ? saved : "en";
-  });
-
-  useEffect(() => {
-    window.localStorage.setItem("ui-language", language);
-  }, [language]);
 
   useEffect(() => {
     const recalculatePageSize = (): void => {
@@ -74,6 +81,43 @@ export function CorpusView() {
   const [generation, setGeneration] = useState<GenerationState>(
     IDLE_GENERATION_STATE,
   );
+
+  useEffect(() => {
+    const hasRankingChanged = rankingChanged(
+      previousRankingSignature.current,
+      rankingSignature,
+    );
+    const hasQuestionChanged = rankingQuestionChanged(
+      previousRankedQuestion.current,
+      rankedQuestion,
+    );
+    previousRankingSignature.current = rankingSignature;
+    previousRankedQuestion.current = rankedQuestion;
+
+    if ((!hasRankingChanged && !hasQuestionChanged) || page === 1) {
+      return;
+    }
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", "1");
+    router.replace(`${pathname}?${params.toString()}`);
+  }, [page, pathname, rankedQuestion, rankingSignature, router, searchParams]);
+
+  useEffect(() => {
+    const totalPages = candidatesQuery.data?.totalPages;
+    if (!totalPages) {
+      return;
+    }
+
+    const targetPage = clampPage(page, totalPages);
+    if (targetPage === page) {
+      return;
+    }
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", String(targetPage));
+    router.replace(`${pathname}?${params.toString()}`);
+  }, [candidatesQuery.data?.totalPages, page, pathname, router, searchParams]);
 
   const startGeneration = ({ force = false }: { force?: boolean }): void => {
     setGeneration({
@@ -148,7 +192,6 @@ export function CorpusView() {
   };
 
   const isRunning = generation.status !== "idle";
-  const labels = UI_LABELS[language];
   const candidates = isRunning
     ? generation.streamedCandidates
     : (candidatesQuery.data?.items ?? []);
@@ -170,15 +213,12 @@ export function CorpusView() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-      <div className="flex min-h-0 flex-col gap-6">
-        <div className="flex items-center justify-end">
-          <LanguageSwitcher language={language} onChange={setLanguage} />
-        </div>
-        <ChatPanel language={language} />
+    <div className="grid grid-cols-1 gap-4 lg:h-[calc(100vh-10rem)] lg:grid-cols-2">
+      <div className="flex min-h-0 flex-col gap-4">
+        <ChatPanel language={language} onLanguageChange={onLanguageChange} />
       </div>
 
-      <div className="flex flex-col gap-6">
+      <div className="flex min-h-0 flex-col gap-3">
         <CorpusToolbar
           language={language}
           isIngested={stats.data?.isIngested ?? false}
@@ -201,14 +241,6 @@ export function CorpusView() {
             page={page}
             totalPages={candidatesQuery.data.totalPages}
           />
-        ) : null}
-        {rankingActive ? (
-          <p
-            aria-live="polite"
-            className="text-xs text-zinc-500 dark:text-zinc-400"
-          >
-            {labels.activeRankingFor} {rankedQuestion}
-          </p>
         ) : null}
       </div>
     </div>

@@ -1,0 +1,1 @@
+export { LanguageSwitcher, type LanguageSwitcherOption } from "./LanguageSwitcher";

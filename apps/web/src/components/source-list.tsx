@@ -1,36 +1,65 @@
 import type { Citation } from "@repo/contracts";
+import { SourceList as UiSourceList, type SourceListItem } from "@repo/ui";
 import { UI_LABELS, type UiLanguage } from "./ui-language";
+
+export function filterCitationsReferencedInAnswer(
+  citations: readonly Citation[],
+  answer: string,
+): readonly Citation[] {
+  const citedIndexes = [...answer.matchAll(/\[([^\]]+)\]/g)].flatMap(
+    (match) => {
+      const groupedReferences = match[1] ?? "";
+
+      return (groupedReferences.match(/\d+/g) ?? []).map(Number);
+    },
+  );
+
+  const references = citedIndexes
+    .filter((index) => Number.isInteger(index) && index > 0)
+    .map((index) => citations[index - 1])
+    .filter((citation): citation is Citation => citation !== undefined);
+
+  return references.length > 0 ? references : citations;
+}
+
+export function uniqueCitationsByCandidate(
+  citations: readonly Citation[],
+): readonly Citation[] {
+  const bySlug = new Map<string, Citation>();
+
+  for (const citation of citations) {
+    const existing = bySlug.get(citation.slug);
+    if (!existing || citation.score > existing.score) {
+      bySlug.set(citation.slug, citation);
+    }
+  }
+
+  return [...bySlug.values()];
+}
 
 export function SourceList({
   citations,
+  answer,
   language,
 }: {
   citations: readonly Citation[];
+  answer: string;
   language: UiLanguage;
 }) {
   const labels = UI_LABELS[language];
-
-  if (citations.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="mt-2 flex flex-wrap items-center gap-2">
-      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
-        {labels.sources}
-      </p>
-      {citations.map((citation, index) => (
-        <a
-          key={`${citation.slug}-${String(citation.ordinal)}-${citation.section}`}
-          href={`/api/proxy/cvs/${citation.slug}/pdf`}
-          target="_blank"
-          rel="noreferrer"
-          className="rounded-full border border-zinc-300 px-2 py-1 text-xs text-zinc-700 transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:focus-visible:ring-zinc-100"
-          title={citation.snippet}
-        >
-          [{index + 1}] {citation.section} · {citation.score.toFixed(2)}
-        </a>
-      ))}
-    </div>
+  const citationsInAnswer = filterCitationsReferencedInAnswer(
+    citations,
+    answer,
   );
+  const uniqueCitations = uniqueCitationsByCandidate(citationsInAnswer);
+  const items: readonly SourceListItem[] = uniqueCitations.map(
+    (citation, index) => ({
+      key: `${citation.slug}-${String(citation.ordinal)}-${citation.section}`,
+      href: `/api/proxy/cvs/${citation.slug}/pdf`,
+      label: `[${index + 1}] ${citation.section} · ${citation.score.toFixed(2)}`,
+      title: citation.snippet,
+    }),
+  );
+
+  return <UiSourceList heading={labels.sources} items={items} />;
 }

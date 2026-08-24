@@ -5,8 +5,11 @@ import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import type {
   AskQuestionRequestDto,
+  Citation,
+  RankedCandidate,
   ScreeningStreamEvent,
 } from "@repo/contracts";
+import { LanguageSwitcher } from "@repo/ui";
 import { useActiveRankingStore } from "../application/active-ranking-store";
 import {
   IDLE_SCREENING_SESSION_STATE,
@@ -15,13 +18,13 @@ import {
 } from "../domain/screening/screening-session";
 import { httpScreeningRepository } from "../infrastructure/screening/http-screening-repository";
 import { SourceList } from "./source-list";
+import { filterCitationsReferencedInAnswer } from "./source-list";
 import { UI_LABELS, type UiLanguage } from "./ui-language";
 
 const SUGGESTED_QUESTIONS = [
   "Who has experience with Python?",
   "Which candidate graduated from UPC?",
-  "Who has experience with Universitat Politècnica de Catalunya?",
-  "¿Quién tiene experiencia en aprendizaje automático?",
+  "¿Quién estudió en Universitat Politècnica de Valencia?",
 ];
 
 function toElegantError(
@@ -48,7 +51,19 @@ function toElegantError(
   };
 }
 
-export function ChatPanel({ language }: { language: UiLanguage }) {
+function collectCitationSlugs(
+  citations: readonly { slug: string }[],
+): Set<string> {
+  return new Set(citations.map((citation) => citation.slug));
+}
+
+export function ChatPanel({
+  language,
+  onLanguageChange,
+}: {
+  language: UiLanguage;
+  onLanguageChange: (language: UiLanguage) => void;
+}) {
   const labels = UI_LABELS[language];
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
@@ -56,36 +71,43 @@ export function ChatPanel({ language }: { language: UiLanguage }) {
   const abortRef = useRef<AbortController | null>(null);
   const nextMessageIdRef = useRef(0);
   const setRanking = useActiveRankingStore((state) => state.setRanking);
+  const latestRankingRef = useRef<readonly RankedCandidate[]>([]);
+  const latestCitationsRef = useRef<readonly Citation[]>([]);
+  const latestAnswerRef = useRef("");
 
   const isStreaming = session.isStreaming;
 
   const canSend = question.trim().length > 0 && !isStreaming;
 
-  const assistantMessage = useMemo<ConversationMessage | null>(() => {
-    if (session.phase === "idle" && session.answer.length === 0) {
+  const streamingAssistantMessage = useMemo<ConversationMessage | null>(() => {
+    if (session.phase === "idle" || session.answer.length === 0) {
       return null;
     }
 
     return {
       id: "assistant-stream",
       role: "assistant",
-      content:
-        session.phase === "error"
-          ? (session.errorMessage ?? "Something went wrong.")
-          : session.answer,
+      content: session.answer,
       isStreaming,
-      isError: session.phase === "error",
       citations: session.citations,
     };
-  }, [isStreaming, session]);
+  }, [isStreaming, session.answer, session.citations, session.phase]);
 
-  const elegantError = useMemo(() => {
-    if (session.phase !== "error") {
-      return null;
+  const collapsedAssistantMessageIds = useMemo<Set<string>>(() => {
+    const assistantMessages = messages.filter(
+      (message) => message.role === "assistant",
+    );
+
+    if (assistantMessages.length <= 1) {
+      return new Set<string>();
     }
 
-    return toElegantError(session.errorMessage, language);
-  }, [language, session.errorMessage, session.phase]);
+    return new Set(
+      assistantMessages
+        .slice(0, assistantMessages.length - 1)
+        .map((message) => message.id),
+    );
+  }, [messages]);
 
   const stopStreaming = (): void => {
     abortRef.current?.abort();
@@ -112,6 +134,9 @@ export function ChatPanel({ language }: { language: UiLanguage }) {
       isStreaming: true,
       phase: "retrieving",
     });
+    latestRankingRef.current = [];
+    latestCitationsRef.current = [];
+    latestAnswerRef.current = "";
 
     const controller = new AbortController();
     abortRef.current = controller;
@@ -130,7 +155,17 @@ export function ChatPanel({ language }: { language: UiLanguage }) {
           );
         },
         onRetrieval: (citations, ranking) => {
-          setRanking(trimmed, ranking);
+          latestRankingRef.current = ranking;
+          latestCitationsRef.current = citations;
+          const citationSlugs = collectCitationSlugs(citations);
+          const rankingForAnswer = ranking.filter((candidate) =>
+            citationSlugs.has(candidate.slug),
+          );
+
+          setRanking(
+            trimmed,
+            rankingForAnswer.length > 0 ? rankingForAnswer : ranking,
+          );
           const retrievalEvent: ScreeningStreamEvent = {
             type: "retrieval",
             citations: [...citations],
@@ -139,23 +174,54 @@ export function ChatPanel({ language }: { language: UiLanguage }) {
           setSession((prev) => reduceScreeningSession(prev, retrievalEvent));
         },
         onToken: (data) => {
+          latestAnswerRef.current += data;
           setSession((prev) =>
             reduceScreeningSession(prev, { type: "token", data }),
           );
         },
         onAnswerEnded: () => {
-          setSession((prev) =>
-            reduceScreeningSession(prev, { type: "answer_ended" }),
+          const citationsInAnswer = filterCitationsReferencedInAnswer(
+            latestCitationsRef.current,
+            latestAnswerRef.current,
           );
+          const citationSlugs = collectCitationSlugs(citationsInAnswer);
+          const refinedRanking = latestRankingRef.current.filter((candidate) =>
+            citationSlugs.has(candidate.slug),
+          );
+
+          if (refinedRanking.length > 0) {
+            setRanking(trimmed, refinedRanking);
+          }
+
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: `assistant-${String(nextMessageIdRef.current)}`,
+              role: "assistant",
+              content: latestAnswerRef.current,
+              citations: citationsInAnswer,
+            },
+          ]);
+          nextMessageIdRef.current += 1;
+
+          setSession(IDLE_SCREENING_SESSION_STATE);
         },
         onDone: () => {
           setSession((prev) => reduceScreeningSession(prev, { type: "done" }));
           abortRef.current = null;
         },
         onError: (message) => {
-          setSession((prev) =>
-            reduceScreeningSession(prev, { type: "error", message }),
-          );
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: `assistant-${String(nextMessageIdRef.current)}`,
+              role: "assistant",
+              content: message,
+              isError: true,
+            },
+          ]);
+          nextMessageIdRef.current += 1;
+          setSession(IDLE_SCREENING_SESSION_STATE);
           abortRef.current = null;
         },
       },
@@ -164,10 +230,21 @@ export function ChatPanel({ language }: { language: UiLanguage }) {
   };
 
   return (
-    <section className="flex h-full max-h-[calc(100vh-12rem)] flex-col rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
-      <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-        {labels.askTitle}
-      </h2>
+    <section className="flex h-[calc(100vh-10rem)] min-h-0 flex-col rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+          {labels.askTitle}
+        </h2>
+        <LanguageSwitcher
+          ariaLabel="Language"
+          value={language}
+          options={[
+            { label: "EN", value: "en" },
+            { label: "ES", value: "es" },
+          ]}
+          onChange={onLanguageChange}
+        />
+      </div>
       <p className="text-sm text-zinc-600 dark:text-zinc-400">
         Ask in natural language; retrieval ranking updates the gallery
         immediately.
@@ -180,34 +257,33 @@ export function ChatPanel({ language }: { language: UiLanguage }) {
         {messages.map((message) => (
           <div
             key={message.id}
-            className="rounded-lg bg-zinc-100 px-3 py-2 text-sm dark:bg-zinc-900"
+            className={
+              message.role === "user"
+                ? "rounded-lg bg-zinc-100 px-3 py-2 text-sm dark:bg-zinc-900"
+                : "rounded-lg border border-zinc-200 px-3 py-2 text-sm dark:border-zinc-800"
+            }
           >
-            <p className="font-medium text-zinc-900 dark:text-zinc-100">You</p>
-            <p className="whitespace-pre-wrap text-zinc-800 dark:text-zinc-200">
-              {message.content}
-            </p>
-          </div>
-        ))}
-
-        {assistantMessage ? (
-          <div className="rounded-lg border border-zinc-200 px-3 py-2 text-sm dark:border-zinc-800">
             <p className="font-medium text-zinc-900 dark:text-zinc-100">
-              Assistant
+              {message.role === "user" ? "You" : "Assistant"}
             </p>
-            {assistantMessage.isError ? (
+            {message.isError ? (
               <div
                 role="alert"
                 className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/50 dark:text-amber-200"
               >
-                <p className="text-sm font-medium">{elegantError?.title}</p>
-                <p className="mt-0.5 text-xs">{elegantError?.body}</p>
+                <p className="text-sm font-medium">
+                  {toElegantError(message.content, language).title}
+                </p>
+                <p className="mt-0.5 text-xs">
+                  {toElegantError(message.content, language).body}
+                </p>
                 <button
                   type="button"
                   className="mt-2 rounded-md border border-amber-300 px-2 py-1 text-xs font-medium text-amber-900 hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-700 dark:border-amber-700 dark:text-amber-200 dark:hover:bg-amber-900/30 dark:focus-visible:ring-amber-300"
                   onClick={() => {
                     const lastQuestion = [...messages]
                       .reverse()
-                      .find((message) => message.role === "user")?.content;
+                      .find((entry) => entry.role === "user")?.content;
                     if (lastQuestion) {
                       sendQuestion(lastQuestion);
                     }
@@ -218,18 +294,62 @@ export function ChatPanel({ language }: { language: UiLanguage }) {
               </div>
             ) : (
               <>
-                <div className="prose prose-sm max-w-none text-zinc-800 dark:prose-invert dark:text-zinc-200">
-                  <ReactMarkdown remarkPlugins={[remarkBreaks]}>
-                    {assistantMessage.content}
-                  </ReactMarkdown>
-                  {assistantMessage.isStreaming ? "▍" : ""}
-                </div>
-                <SourceList
-                  citations={assistantMessage.citations ?? []}
-                  language={language}
-                />
+                {message.role === "assistant" &&
+                collapsedAssistantMessageIds.has(message.id) ? (
+                  <details className="mt-2 rounded-md border border-zinc-200 bg-zinc-50/50 p-2 dark:border-zinc-800 dark:bg-zinc-900/40">
+                    <summary className="cursor-pointer select-none text-xs font-medium text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:text-zinc-200 dark:focus-visible:ring-zinc-100">
+                      {labels.previousAnswer}
+                    </summary>
+                    <div className="prose prose-sm mt-2 max-w-none text-zinc-800 dark:prose-invert dark:text-zinc-200">
+                      <ReactMarkdown remarkPlugins={[remarkBreaks]}>
+                        {message.content}
+                      </ReactMarkdown>
+                    </div>
+                    <SourceList
+                      citations={message.citations ?? []}
+                      answer={message.content}
+                      language={language}
+                    />
+                  </details>
+                ) : message.role === "assistant" ? (
+                  <>
+                    <div className="prose prose-sm max-w-none text-zinc-800 dark:prose-invert dark:text-zinc-200">
+                      <ReactMarkdown remarkPlugins={[remarkBreaks]}>
+                        {message.content}
+                      </ReactMarkdown>
+                    </div>
+                    <SourceList
+                      citations={message.citations ?? []}
+                      answer={message.content}
+                      language={language}
+                    />
+                  </>
+                ) : (
+                  <p className="whitespace-pre-wrap text-zinc-800 dark:text-zinc-200">
+                    {message.content}
+                  </p>
+                )}
               </>
             )}
+          </div>
+        ))}
+
+        {streamingAssistantMessage ? (
+          <div className="rounded-lg border border-zinc-200 px-3 py-2 text-sm dark:border-zinc-800">
+            <p className="font-medium text-zinc-900 dark:text-zinc-100">
+              Assistant
+            </p>
+            <div className="prose prose-sm max-w-none text-zinc-800 dark:prose-invert dark:text-zinc-200">
+              <ReactMarkdown remarkPlugins={[remarkBreaks]}>
+                {streamingAssistantMessage.content}
+              </ReactMarkdown>
+              {streamingAssistantMessage.isStreaming ? "▍" : ""}
+            </div>
+            <SourceList
+              citations={streamingAssistantMessage.citations ?? []}
+              answer={streamingAssistantMessage.content}
+              language={language}
+            />
           </div>
         ) : null}
       </div>

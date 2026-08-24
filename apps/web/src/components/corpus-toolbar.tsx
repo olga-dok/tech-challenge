@@ -37,7 +37,7 @@ function useCountdownSeconds(delayMs: number | null): number {
 }
 
 /**
- * "Generate corpus" / "Regenerate" (confirm-gated — it costs minutes), a live
+ * "Generate corpus", a live
  * progress label while a run is active, and "Generate remaining N" after a
  * run that didn't finish everything.
  */
@@ -58,28 +58,21 @@ export function CorpusToolbar({
   );
   const isRunning = state.status !== "idle";
 
-  const handleRegenerate = (): void => {
-    if (window.confirm(labels.regenerateConfirm)) {
-      onGenerate({ force: true });
-    }
-  };
-
   const remaining =
     !isRunning && state.failedCount > 0 && state.endedWithGaps
       ? state.failedCount
       : 0;
+  const hasStatus =
+    state.status === "throttled" ||
+    (state.status === "running" && state.total !== null);
+
+  if (isIngested && remaining === 0 && !hasStatus) {
+    return null;
+  }
 
   return (
     <div className="flex flex-wrap items-center gap-3">
-      {isIngested ? (
-        <Button
-          variant="secondary"
-          onClick={handleRegenerate}
-          disabled={isRunning}
-        >
-          {labels.regenerateCorpus}
-        </Button>
-      ) : (
+      {!isIngested ? (
         <Button
           variant="primary"
           onClick={() => {
@@ -89,7 +82,7 @@ export function CorpusToolbar({
         >
           {labels.generateCorpus}
         </Button>
-      )}
+      ) : null}
 
       {remaining > 0 ? (
         <Button
@@ -102,21 +95,21 @@ export function CorpusToolbar({
         </Button>
       ) : null}
 
-      <p
-        role="status"
-        aria-live="polite"
-        className="text-sm text-zinc-600 dark:text-zinc-400"
-      >
-        {state.status === "throttled"
-          ? labels.waitingRateLimit(countdownSeconds)
-          : state.status === "running" && state.total !== null
-            ? `${labels.generationProgress(state.completed, state.total)}${
+      {hasStatus ? (
+        <p
+          role="status"
+          aria-live="polite"
+          className="text-sm text-zinc-600 dark:text-zinc-400"
+        >
+          {state.status === "throttled"
+            ? labels.waitingRateLimit(countdownSeconds)
+            : `${labels.generationProgress(state.completed, state.total ?? 0)}${
                 state.currentBatch !== null && state.totalBatches !== null
                   ? ` · ${labels.batchProgress(state.currentBatch, state.totalBatches)}`
                   : ""
-              }`
-            : null}
-      </p>
+              }`}
+        </p>
+      ) : null}
     </div>
   );
 }

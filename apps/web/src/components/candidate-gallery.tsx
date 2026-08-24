@@ -1,5 +1,6 @@
-import type { CandidateSummary } from "../domain/corpus/corpus-summary";
 import type { RankedCandidate } from "@repo/contracts";
+import { StatusBanner } from "@repo/ui";
+import type { CandidateSummary } from "../domain/corpus/corpus-summary";
 import { CandidateCard } from "./candidate-card";
 import type { UiLanguage } from "./ui-language";
 
@@ -24,13 +25,9 @@ export function CandidateGallery({
   return (
     <div className="flex flex-col gap-3">
       {failedCount !== undefined && failedCount > 0 ? (
-        <p
-          role="status"
-          aria-live="polite"
-          className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:bg-amber-950 dark:text-amber-300"
-        >
+        <StatusBanner tone="warning">
           {failedCount} {failedCount === 1 ? "CV" : "CVs"} failed to generate.
-        </p>
+        </StatusBanner>
       ) : null}
 
       <div className="flex flex-col gap-3">

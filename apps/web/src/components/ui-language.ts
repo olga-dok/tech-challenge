@@ -30,6 +30,7 @@ type Labels = {
   aiTemporarilyUnavailable: string;
   tryAgainSoon: string;
   retry: string;
+  previousAnswer: string;
 };
 
 export const UI_LABELS: Record<UiLanguage, Labels> = {
@@ -72,10 +73,11 @@ export const UI_LABELS: Record<UiLanguage, Labels> = {
     aiTemporarilyUnavailable: "AI temporarily unavailable",
     tryAgainSoon: "Please try again in a moment.",
     retry: "Retry",
+    previousAnswer: "Show answer",
   },
   es: {
     appDescription:
-      "Busca y evalúa candidatos con respuestas de IA fundamentadas en sus CV.",
+      "Busca y evalúa candidatos con respuestas de IA basadas en sus CV.",
     askTitle: "Pregunta",
     askPlaceholder:
       "Pregunta sobre habilidades, experiencia, educación o encaje del candidato…",
@@ -112,5 +114,6 @@ export const UI_LABELS: Record<UiLanguage, Labels> = {
     aiTemporarilyUnavailable: "IA temporalmente no disponible",
     tryAgainSoon: "Vuelve a intentarlo en un momento.",
     retry: "Reintentar",
+    previousAnswer: "Enseñar respuesta",
   },
 };

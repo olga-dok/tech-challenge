@@ -24,7 +24,7 @@ describe("CorpusToolbar", () => {
     ).not.toBeInTheDocument();
   });
 
-  it('shows "Regenerate" when the corpus is already ingested', () => {
+  it("does not show a corpus action button when the corpus is already ingested", () => {
     render(
       <CorpusToolbar
         language="en"
@@ -35,8 +35,8 @@ describe("CorpusToolbar", () => {
     );
 
     expect(
-      screen.getByRole("button", { name: "Regenerate corpus" }),
-    ).toBeInTheDocument();
+      screen.queryByRole("button", { name: "Generate corpus" }),
+    ).not.toBeInTheDocument();
   });
 
   it("disables the button while a run is active", () => {
