@@ -1,8 +1,17 @@
 # AI-Powered CV Screener
 
-An end-to-end prototype that generates realistic fake CV PDFs, ingests them into `pgvector`, and answers natural-language screening questions with grounded citations while synchronizing the gallery to the ranked candidates behind each answer.
+**AI-powered candidate screening from synthetic CVs.** Generate realistic CVs, index them in PostgreSQL + pgvector, and ask natural-language screening questions that return grounded answers, citations, and ranked candidates synchronized with the gallery.
 
 ![Gallery filtered by a chat answer](docs/Screenshot.png)
+
+## What it demonstrates
+
+- **Synthetic CV generation** — structured candidate profiles, portraits, HTML templates and PDFs.
+- **Semantic + lexical retrieval** — hybrid search over section-aware CV chunks.
+- **Grounded screening answers** — answers are generated from retrieved CV evidence with citations.
+- **Candidate ranking** — screening results automatically synchronize with the candidate gallery.
+- **Streaming UX** — screening answers are streamed to the UI via SSE.
+- **Type-safe monorepo** — shared Zod contracts between the NestJS API and Next.js frontend.
 
 ## Prerequisites
 
@@ -53,15 +62,15 @@ An end-to-end prototype that generates realistic fake CV PDFs, ingests them into
 
 ### Runtime and cost expectations
 
-- Default corpus size is `25`; for `30` CVs expect a few minutes wall-clock on free tiers depending on provider latency/quota.
-- The default stack is designed to run at zero direct model cost on free tiers (local embeddings + free text model + keyless/default portrait fallback).
+- Default corpus size is `25`; generating `25` CVs should take a few minutes wall-clock on free tiers depending on provider latency/quota.
+- The default stack is designed to minimize API costs by using local embeddings and free-tier model providers. Actual free-tier limits depend on the provider and account.
 
 ### CLI-first flow
 
 If you prefer terminal execution:
 
 ```bash
-pnpm generate:cvs -- --size 30 --seed 42
+pnpm generate:cvs -- --size 25 --seed 42
 pnpm ingest:cvs
 ```
 
@@ -76,10 +85,23 @@ pnpm ingest:cvs
 | `OPENROUTER_API_KEY` | Conditional | — | Required if `LLM_PROVIDER=openrouter` |
 | `LLM_PROVIDER` | No | `gemini` | `gemini` \| `openrouter` |
 | `EMBEDDING_PROVIDER` | No | `local` | Local `multilingual-e5-small` (`384` dims) |
-| `PORTRAIT_PROVIDER` | No | `pollinations` | Falls back to deterministic local `svg` avatar |
+| `PORTRAIT_PROVIDER` | No | `gemini` | Falls back to deterministic local `svg` avatar |
 | `NEXT_PUBLIC_API_URL` | No | `http://localhost:3001` | Web app API origin |
 
 Most variables are optional and already have free-safe defaults.
+
+## Tech stack
+
+- **Frontend:** Next.js, React, TypeScript
+- **Backend:** NestJS, TypeScript
+- **Database:** PostgreSQL + pgvector
+- **ORM:** Prisma
+- **Validation/contracts:** Zod
+- **Embeddings:** multilingual-e5-small
+- **LLM:** Gemini / OpenRouter
+- **Streaming:** SSE
+- **Monorepo:** pnpm + Turborepo
+- **Infrastructure:** Docker
 
 ## Architecture
 
@@ -134,7 +156,9 @@ flowchart TB
 | Section-aware chunking with identity prefixes | Improves grounding and candidate attribution in retrieval | Larger chunk payloads |
 | Streaming generation instead of job queue | Immediate UI feedback and simpler prototype operations | Does not survive process restart like a durable queue |
 
-## What I would do next
+## Known limitations and next steps
+
+This is intentionally scoped as a take-home prototype rather than a production-ready screening platform.
 
 - Add a reranker model on top of fused retrieval results.
 - Add conversational memory so follow-up questions refine active gallery ranking.
@@ -152,11 +176,11 @@ apps/
       Screening/           Bounded context: retrieval + grounded answering
       Shared/              Cross-cutting: Config, Prisma, Sse, Logger, errors, filters
     prisma/                schema.prisma + migrations
-    test/                  unit/ and integration/ — NEVER put tests in src/
+    test/                  unit/ and integration/
     storage/               Generated PDFs + profile JSON (gitignored)
   web/                     Next.js app (port 3000)
     src/
-      domain/              Entities, value types, PORT interfaces. No framework imports
+      domain/              Entities, value types, PORT interfaces
       application/         Use cases, orchestration. Depends on domain/ only
       infrastructure/      Port implementations: fetch/SSE clients, SWR hooks
       components/          UI composition and interaction only
@@ -167,6 +191,15 @@ packages/
   eslint-config/           Shared ESLint (base, next)
   typescript-config/       Shared tsconfig (base, next, node)
 ```
+## Testing
+
+The test suite covers the main domain and application paths, including:
+
+- CV generation and template rendering
+- PDF ingestion and chunking
+- hybrid retrieval
+- screening answer generation
+- API contracts and infrastructure adapters
 
 ## Commands
 
