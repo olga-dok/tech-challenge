@@ -67,8 +67,6 @@ packages/
   ui/                      Design system: atoms/ → molecules/ → organisms/
   eslint-config/           Shared ESLint (base, next)
   typescript-config/       Shared tsconfig (base, next, node)
-evaluation/                Golden dataset, scoring metrics, LLM judges, offline runner
-docs/                      EXECUTION-PLAN.md, architecture.md, demo-script.md
 ```
 
 ---
